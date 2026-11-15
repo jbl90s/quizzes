@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quizzes para os Amigos</title>
+<style>
+:root {
+  --bg: #F6F1F4; --fg: #221A28; --muted: #62566B; --card: #FFFFFF; --line: #DDD2DA; --accent: #B3265E;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --bg: #16111B; --fg: #F3EAF1; --muted: #B4A6BD; --card: #231B2B; --line: #3B2E46; --accent: #FF7FAE; color-scheme: dark; }
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--bg); color: var(--fg);
+  font: 17px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  padding: 40px max(16px, env(safe-area-inset-right, 0px)) 56px max(16px, env(safe-area-inset-left, 0px));
+}
+main { max-width: 640px; margin: 0 auto; }
+h1 { font-size: clamp(34px, 9vw, 52px); line-height: 1.05; margin: 8px 0 12px; text-wrap: balance; }
+.lead { color: var(--muted); margin: 0 0 28px; }
+.eyebrow { font-size: 13px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); font-weight: 700; margin: 0; }
+.grid { display: grid; gap: 16px; }
+a.q {
+  display: block; text-decoration: none; color: inherit; background: var(--card);
+  border: 2px solid var(--fg); border-radius: 14px; padding: 22px; box-shadow: 5px 5px 0 var(--fg);
+  transition: transform .12s ease, box-shadow .12s ease;
+}
+a.q:hover { transform: translate(-1px, -1px); box-shadow: 6px 6px 0 var(--fg); }
+a.q:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+a.q h2 { margin: 0 0 6px; font-size: 26px; line-height: 1.1; }
+a.q p { margin: 0; color: var(--muted); }
+a.q span { display: inline-block; margin-top: 12px; color: var(--accent); font-weight: 700; }
+</style>
+</head>
+<body>
+<main>
+  <p class="eyebrow">Testes sem validade científica</p>
+  <h1>Quizzes para os amigos</h1>
+  <p class="lead">Escolha um, responda sem pensar demais e mande o resultado no grupo.</p>
+  <div class="grid">
+    <a class="q" href="princesa/">
+      <h2>Qual princesa você seria?</h2>
+      <p>12 perguntas, 18 princesas e muitas respostas improváveis.</p>
+      <span>Fazer o quiz →</span>
+    </a>
+    <a class="q" href="carro/">
+      <h2>Qual marca de carro você seria?</h2>
+      <p>14 perguntas absurdas, 23 marcas e uma ficha de veículo no final.</p>
+      <span>Fazer o quiz →</span>
+    </a>
+  </div>
+</main>
+</body>
+</html>

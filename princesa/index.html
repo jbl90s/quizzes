@@ -1,0 +1,531 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Qual Princesa Você Seria</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=Figtree:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* Layout: coluna única estreita, uma pergunta por vez, e no final uma "carta" de destino tingida com a cor da princesa */
+:root {
+  --bg: #FBF3F8;
+  --fg: #2B1634;
+  --muted: #6F5A78;
+  --card: #FFFFFF;
+  --line: #E7D5E4;
+  --accent: #C2255C;
+  --accent-ink: #FFFFFF;
+  --gold: #B9820F;
+  --ink-on-pc: #1E1024;
+  --pc: #C2255C;
+  --font-display: "Bricolage Grotesque", "Trebuchet MS", system-ui, sans-serif;
+  --font-body: "Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #1A0F21;
+    --fg: #F7EAF3;
+    --muted: #BBA3C4;
+    --card: #271733;
+    --line: #43294F;
+    --accent: #FF7FAE;
+    --accent-ink: #2A0F1B;
+    --gold: #F2C14E;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #1A0F21;
+  --fg: #F7EAF3;
+  --muted: #BBA3C4;
+  --card: #271733;
+  --line: #43294F;
+  --accent: #FF7FAE;
+  --accent-ink: #2A0F1B;
+  --gold: #F2C14E;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background-color: var(--bg);
+  background-image: radial-gradient(var(--line) 1px, transparent 1.3px);
+  background-size: 24px 24px;
+  color: var(--fg);
+  font-family: var(--font-body);
+  font-size: 17px;
+  line-height: 1.5;
+  padding-block: 28px 56px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.wrap { max-width: 640px; margin: 0 auto; }
+h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; margin: 0; line-height: 1.05; }
+p { margin: 0; }
+button { font: inherit; color: inherit; cursor: pointer; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+
+.eyebrow { font-size: 13px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
+.card {
+  background: var(--card);
+  border: 2px solid var(--fg);
+  border-radius: 18px;
+  padding: clamp(20px, 5vw, 36px);
+  box-shadow: 6px 6px 0 var(--fg);
+}
+
+/* intro */
+.intro h1 { font-size: clamp(40px, 11vw, 68px); font-weight: 800; letter-spacing: -.02em; margin: 10px 0 16px; }
+.intro h1 em { font-style: normal; color: var(--accent); }
+.intro .lead { font-size: 19px; color: var(--muted); max-width: 46ch; }
+.intro .meta { display: flex; flex-wrap: wrap; gap: 8px; margin: 22px 0 26px; }
+.pill { border: 1.5px solid var(--line); border-radius: 999px; padding: 4px 12px; font-size: 14px; font-weight: 600; color: var(--muted); }
+.btn {
+  background: var(--accent); color: var(--accent-ink);
+  border: 2px solid var(--fg); border-radius: 12px;
+  padding: 14px 24px; font-weight: 700; font-size: 18px;
+  box-shadow: 3px 3px 0 var(--fg);
+  transition: transform .12s ease, box-shadow .12s ease;
+}
+.btn:hover { transform: translate(-1px, -1px); box-shadow: 4px 4px 0 var(--fg); }
+.btn:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--fg); }
+.btn.ghost { background: transparent; color: var(--fg); }
+
+/* quiz */
+.topbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
+.back { background: none; border: none; padding: 6px 0; color: var(--muted); font-weight: 600; }
+.back[disabled] { visibility: hidden; }
+.bar { height: 10px; border-radius: 999px; background: var(--line); overflow: hidden; margin-bottom: 20px; }
+.bar > span { display: block; height: 100%; background: var(--accent); border-radius: 999px; transition: width .35s ease; }
+.q-title { font-size: clamp(25px, 6.4vw, 34px); font-weight: 800; letter-spacing: -.01em; margin-bottom: 22px; }
+.opts { display: grid; gap: 10px; }
+.opt {
+  display: grid; grid-template-columns: 34px minmax(0, 1fr); align-items: start; gap: 12px;
+  text-align: left; background: var(--bg); border: 2px solid var(--line); border-radius: 12px;
+  padding: 13px 14px; transition: border-color .12s ease, transform .12s ease, background .12s ease;
+}
+.opt:hover { border-color: var(--fg); transform: translateX(3px); }
+.opt .k {
+  width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center;
+  font-family: var(--font-display); font-weight: 800; border: 2px solid var(--fg); background: var(--card);
+}
+.opt.picked { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 14%, var(--card)); }
+.opt.picked .k { background: var(--accent); color: var(--accent-ink); }
+.react { min-height: 26px; margin-top: 16px; color: var(--muted); font-style: italic; }
+
+/* result */
+.result { --pc: #C2255C; }
+.carta {
+  background: color-mix(in srgb, var(--pc) 13%, var(--card));
+  border: 2px solid var(--fg);
+  outline: 2px solid var(--pc); outline-offset: -9px;
+  border-radius: 18px; box-shadow: 6px 6px 0 var(--fg);
+  padding: clamp(24px, 6vw, 40px) clamp(22px, 6vw, 40px);
+}
+.carta .top { display: flex; align-items: center; gap: 16px; margin: 10px 0 18px; }
+.emblem {
+  flex: none; width: 76px; height: 76px; border-radius: 50%;
+  background: var(--pc); color: var(--ink-on-pc); border: 2px solid var(--fg);
+  display: grid; place-items: center;
+  font-family: var(--font-display); font-weight: 800; font-size: 42px;
+}
+.carta h2 { font-size: clamp(36px, 10vw, 58px); font-weight: 800; letter-spacing: -.02em; }
+.film { color: var(--muted); font-weight: 600; margin-top: 4px; }
+.desc { font-size: 18px; margin: 4px 0 20px; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 22px; }
+.chip { background: var(--pc); color: var(--ink-on-pc); border: 1.5px solid var(--fg); border-radius: 999px; padding: 3px 12px; font-weight: 700; font-size: 14px; }
+.facts { display: grid; gap: 12px; margin-bottom: 4px; }
+.fact { border-top: 1.5px dashed var(--fg); padding-top: 12px; }
+.fact b { display: block; font-size: 13px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-bottom: 2px; }
+.also { margin-top: 26px; }
+.also h3 { font-size: 22px; margin-bottom: 12px; }
+.row { display: grid; grid-template-columns: minmax(0, 1fr) 90px; gap: 12px; align-items: center; margin-bottom: 10px; }
+.row .nm { font-weight: 700; }
+.track { height: 12px; background: var(--line); border-radius: 999px; overflow: hidden; border: 1.5px solid var(--fg); }
+.track > span { display: block; height: 100%; background: var(--c, var(--accent)); }
+.actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+.share-field { width: 100%; margin-top: 14px; padding: 10px 12px; border: 2px solid var(--fg); border-radius: 10px; background: var(--card); color: var(--fg); font: inherit; font-size: 15px; }
+.toast { margin-top: 12px; color: var(--muted); font-weight: 600; min-height: 24px; }
+.foot { text-align: center; color: var(--muted); font-size: 14px; margin-top: 30px; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .fade { animation: up .35s ease both; }
+  @keyframes up { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+}
+body{margin:0}[hidden]{display:none!important}</style>
+</head>
+<body>
+
+
+<div class="wrap">
+
+  <section id="intro" class="card intro fade">
+    <p class="eyebrow">Teste oficial, sem validade científica</p>
+    <h1>Qual <em>princesa</em> você seria?</h1>
+    <p class="lead">Doze perguntas, quase nenhuma faz sentido e todas dizem muito sobre você. Responda rápido, sem pensar demais.</p>
+    <div class="meta">
+      <span class="pill">12 perguntas</span>
+      <span class="pill">18 resultados possíveis</span>
+      <span class="pill">uns 2 minutos</span>
+    </div>
+    <button class="btn" id="startBtn" type="button">Descobrir meu destino</button>
+  </section>
+
+  <section id="quiz" hidden>
+    <div class="card fade" id="quizCard">
+      <div class="topbar">
+        <button class="back" id="backBtn" type="button">← Voltar</button>
+        <span class="eyebrow" id="counter"></span>
+      </div>
+      <div class="bar" role="progressbar" aria-label="Progresso do quiz" aria-valuemin="0" aria-valuemax="12" id="barWrap"><span id="barFill" style="width:0%"></span></div>
+      <h2 class="q-title" id="qTitle"></h2>
+      <div class="opts" id="opts" role="group" aria-labelledby="qTitle"></div>
+      <p class="react" id="react" aria-live="polite"></p>
+    </div>
+  </section>
+
+  <section id="result" class="result" hidden></section>
+
+  <p class="foot">Feito com carinho e zero rigor científico.</p>
+</div>
+
+<script>
+(function () {
+  var P = {
+    bn: { name: "Branca de Neve", film: "Branca de Neve e os Sete Anões", color: "#F0647C",
+      traits: ["Empatia", "Gentileza", "Otimismo", "Generosidade", "Sociabilidade"],
+      text: "Você cumprimenta o porteiro pelo nome, lembra do aniversário do cachorro do vizinho e faz amizade até com quem só pediu informação. Seu otimismo é tão forte que você já adotou sete colegas de casa sem perceber.",
+      power: "Transformar desconhecidos em amigos em quatro minutos.",
+      flaw: "Aceitar comida de estranhos com um sorriso. Confira a procedência, por favor." },
+    ci: { name: "Cinderela", film: "Cinderela", color: "#6C9BFF",
+      traits: ["Resiliência", "Paciência", "Inteligência emocional", "Humildade", "Perseverança"],
+      text: "Quando o grupo precisa de alguém para resolver a bagunça às 23h, adivinha quem aparece? Com paciência de monge e humildade de quem nunca pediu plateia, você vai levando a vida um passo de cada vez até o sapato servir.",
+      power: "Manter a calma enquanto tudo pega fogo e ainda lavar a louça.",
+      flaw: "Dizer “tudo bem” quando não está nada bem." },
+    au: { name: "Aurora", film: "A Bela Adormecida", color: "#F29BC4",
+      traits: ["Serenidade", "Sensibilidade", "Gentileza", "Romantismo", "Espontaneidade"],
+      text: "Serena, sensível e romântica, você vive num ritmo só seu. Passeia cantarolando, chora com trailer de filme e tem um talento invejável para tirar soneca em qualquer lugar. Sim, até em reunião.",
+      power: "Dormir catorze horas e acordar com cara de comercial de skincare.",
+      flaw: "Perder prazo, ônibus e a noção do tempo, de preferência juntos." },
+    ar: { name: "Ariel", film: "A Pequena Sereia", color: "#3CCB93",
+      traits: ["Curiosidade", "Ousadia", "Criatividade", "Iniciativa", "Espírito explorador"],
+      text: "Sua curiosidade abre gaveta alheia com a melhor das intenções e sempre encontra tesouro onde ninguém olhou. Você tem uma coleção de coisas que não sabe para que servem e coragem de sobra para sair do raso.",
+      power: "Aprender um assunto novo e virar especialista até domingo.",
+      flaw: "Trocar o certo pelo fascinante, várias vezes seguidas." },
+    be: { name: "Bela", film: "A Bela e a Fera", color: "#F0BD3D",
+      traits: ["Inteligência", "Pensamento crítico", "Independência intelectual", "Empatia", "Coragem moral"],
+      text: "Você escolhe o livro em vez da festa e depois convence a festa a virar clube de leitura. Pensamento crítico afiado, empatia de sobra e uma recusa total de julgar pela capa. Só não aceita que mandem em você.",
+      power: "Ler pessoas, livros e termos de uso até o final.",
+      flaw: "Abrir uma aba “só pra conferir” e acabar às 3h da manhã na Wikipédia." },
+    ja: { name: "Jasmine", film: "Aladdin", color: "#2BB3A3",
+      traits: ["Independência", "Assertividade", "Senso de justiça", "Determinação", "Autoconfiança"],
+      text: "Direta, autoconfiante e com zero paciência para regra sem sentido. Se mandam você ficar no palácio, você já está planejando a saída pela janela. Sua assertividade não é arrogância: você só tem razão e sabe disso.",
+      power: "Dizer “não” com tanta classe que parece elogio.",
+      flaw: "Não saber pedir carona quando o carro quebra." },
+    po: { name: "Pocahontas", film: "Pocahontas", color: "#D79A63",
+      traits: ["Sabedoria", "Diplomacia", "Empatia", "Equilíbrio emocional", "Capacidade de conciliação"],
+      text: "Calma que você resolve. Com diplomacia de embaixador e um talento raro para ouvir os dois lados do grupo de WhatsApp sem tomar partido, você é quem leva paz para casamentos, reuniões e assembleias de condomínio.",
+      power: "Mediar uma briga só com o olhar.",
+      flaw: "Ficar tão no meio que ninguém sabe o que você quer jantar." },
+    mu: { name: "Mulan", film: "Mulan", color: "#F26A5E",
+      traits: ["Coragem", "Inteligência estratégica", "Adaptabilidade", "Lealdade", "Improviso"],
+      text: "Você já precisou se virar com o que tinha e funcionou. Improvisa, aprende rápido e é leal mesmo quando ninguém está vendo. Quando tudo sai do plano, você diz “plano B” e olha que o C já estava pronto.",
+      power: "Resolver qualquer problema com o que estiver na bolsa.",
+      flaw: "Fingir que está tudo sob controle até o último segundo." },
+    ti: { name: "Tiana", film: "A Princesa e o Sapo", color: "#5CB878",
+      traits: ["Disciplina", "Ambição", "Organização", "Responsabilidade", "Pragmatismo", "Foco"],
+      text: "Agenda cheia, planilha de metas e uma frigideira sempre por perto. Você acredita em trabalho duro e em terminar o que começa. O seu sonho já tem fornecedor, fluxo de caixa e, provavelmente, CNPJ.",
+      power: "Transformar um plano em negócio de verdade, com lucro.",
+      flaw: "Esquecer de dançar de vez em quando." },
+    ra: { name: "Rapunzel", film: "Enrolados", color: "#B983F0",
+      traits: ["Criatividade", "Curiosidade", "Otimismo", "Inteligência prática", "Coragem", "Adaptabilidade"],
+      text: "Criativa e curiosa, com o otimismo de quem ficou tempo demais num lugar pequeno e agora quer ver tudo. Você faz arte com o que tiver à mão, vira amigo de gente suspeita e acha solução onde os outros só veem problema.",
+      power: "Pintar uma parede inteira numa tarde e ainda fazer amizade com o vizinho.",
+      flaw: "Confiar rápido demais em quem sorri com charme." },
+    me: { name: "Merida", film: "Valente", color: "#E6804A",
+      traits: ["Autonomia", "Coragem", "Autenticidade", "Determinação", "Personalidade forte"],
+      text: "Autonomia é a sua palavra-chave. Você diz o que pensa, escolhe o próprio caminho e não vai fazer algo só porque a família combinou. Seu cabelo, sua regra, sua opinião sobre a pizza.",
+      power: "Acertar na mosca, seja em decisão, flecha ou discussão.",
+      flaw: "Teimar mesmo depois de perceber o erro." },
+    mo: { name: "Moana", film: "Moana: Um Mar de Aventuras", color: "#F5A83A",
+      traits: ["Liderança", "Perseverança", "Responsabilidade", "Coragem", "Intuição", "Propósito"],
+      text: "Líder por vocação, você sente o que precisa ser feito e vai, mesmo sem ter certeza do mapa. Sua perseverança vira missão e sua intuição é melhor que GPS.",
+      power: "Seguir o próprio rumo e arrastar todo mundo junto, de bom grado.",
+      flaw: "Não aguentar ficar no sofá por mais de quarenta minutos." },
+    ry: { name: "Raya", film: "Raya e o Último Dragão", color: "#5F7FCF",
+      traits: ["Astúcia", "Estratégia", "Resiliência", "Coragem", "Liderança", "Senso crítico"],
+      text: "Astúcia, estratégia e uma desconfiança saudável. Você lê o ambiente antes de entrar, sabe quem está enrolando e já mapeou a saída de emergência. Confiar é difícil, mas liderar vem fácil.",
+      power: "Montar um plano de resgate com quatro clipes e um guardanapo.",
+      flaw: "Demorar a acreditar que o grupo também pode dar certo." },
+    el: { name: "Elsa", film: "Frozen: Uma Aventura Congelante e Frozen II", color: "#8ED3F0",
+      traits: ["Autocontrole", "Introspecção", "Responsabilidade", "Independência", "Coragem emocional", "Autoconhecimento"],
+      text: "Calma por fora, tempestade por dentro. Você é independente, tem autocontrole de sobra e uma vida interior tão rica que precisaria de um castelo para caber. Quando decide abrir o coração, o resultado é espetacular.",
+      power: "Esfriar qualquer climão, de preferência com o ar-condicionado em 16 graus.",
+      flaw: "Marcar reunião com a própria emoção e sempre adiar a pauta." },
+    an: { name: "Anna", film: "Frozen: Uma Aventura Congelante e Frozen II", color: "#FF8A73",
+      traits: ["Lealdade", "Determinação", "Espontaneidade", "Empatia", "Coragem", "Iniciativa"],
+      text: "Leal, espontânea e sem filtro. Você acredita em todo mundo, topa a ideia mais maluca e atravessa a montanha para ajudar quem ama. Sua mistura de coragem e atrapalhação é irresistível.",
+      power: "Contagiar o ambiente com entusiasmo, mesmo sem café.",
+      flaw: "Aceitar plano de última hora sem nem perguntar o endereço." },
+    mg: { name: "Megara", film: "Hércules", color: "#C46AC4",
+      traits: ["Perspicácia", "Ironia", "Inteligência emocional", "Independência", "Autodefesa"],
+      text: "Ironia afiada, inteligência emocional e a frase certa na hora certa. Você já se machucou e aprendeu a se proteger com humor. Por trás do “eu não ligo” mora um coração de ouro e uma lealdade que ninguém merece.",
+      power: "Responder com sarcasmo e charme na mesma frase.",
+      flaw: "Negar que se importa até o último capítulo." },
+    ki: { name: "Kida", film: "Atlantis: O Reino Perdido", color: "#4FB0E0",
+      traits: ["Liderança", "Curiosidade científica", "Coragem", "Responsabilidade", "Sabedoria"],
+      text: "Líder, cientista e exploradora de ruínas. Você junta a curiosidade de quem pesquisa, a sabedoria de quem leu muito e a responsabilidade de quem sabe que a civilização inteira depende do seu cuidado.",
+      power: "Explicar uma civilização antiga em três minutos, com mapa.",
+      flaw: "Esquecer que o resto da turma não leu o mesmo livro." },
+    mi: { name: "Mirabel", film: "Encanto", color: "#B8D45A",
+      traits: ["Sensibilidade", "Empatia", "Persistência", "Observação", "Inteligência interpessoal"],
+      text: "Observadora e sensível, você percebe o que ninguém disse e coloca todo mundo na mesma mesa. Mesmo quando parece que a família não te enxerga, você insiste e acaba juntando os pedaços.",
+      power: "Notar o que está errado antes de todo mundo e consertar com carinho.",
+      flaw: "Carregar a casa inteira nas costas e chamar de “nada demais”." }
+  };
+
+  var Q = [
+    { q: "Você acorda e um esquilo falante, de roupão, está comendo a sua granola. Você:", o: [
+      ["Pergunto o nome dele, ofereço chá e já viramos amigos.", ["bn", "au", "po"]],
+      ["Percebo que ele está tenso. Sento ao lado e pergunto o que aconteceu.", ["mi", "po", "be"]],
+      ["Monto um plano de captura em três etapas, com isca de nozes e caixa de papelão.", ["ry", "ti", "mu"]],
+      ["Finalmente, um parceiro de aventura! Pego a mochila e vamos.", ["ar", "ra", "an"]]
+    ]},
+    { q: "A festa está um tédio total. Qual é a sua jogada?", o: [
+      ["Assumo a playlist. Em dez minutos até a tia do aniversariante está dançando.", ["mo", "an", "ja"]],
+      ["Fico observando de longe até perceber quem precisa de companhia.", ["mi", "el", "po"]],
+      ["Solto um comentário tão sarcástico que a festa vira uma roda de risadas.", ["mg", "me", "ja"]],
+      ["Saio sem avisar para ver o nascer do sol numa cachoeira que achei no mapa.", ["ar", "au", "ra"]]
+    ]},
+    { q: "O seu superpoder mais provável, e mais inútil, seria:", o: [
+      ["Conversar com peixes, mas só com os que estão entediados.", ["ar", "bn", "ra"]],
+      ["Saber o que cada pessoa da sala está sentindo, inclusive o gato.", ["mi", "po", "ci"]],
+      ["Transformar qualquer sobra de geladeira em jantar de restaurante.", ["ti", "mu", "ra"]],
+      ["Congelar um copo d’água só de olhar feio para ele.", ["el", "mg", "me"]]
+    ]},
+    { q: "Um dragão (muito educado) pede que você lidere a busca por cinco pedaços de uma gema mágica. Sua reação:", o: [
+      ["Mapeio os pedaços, os riscos e quem pode me trair antes mesmo de sair de casa.", ["ry", "ki", "ti"]],
+      ["Aceito. Alguém precisa fazer isso e, pelo visto, sou eu.", ["mo", "ki", "el"]],
+      ["Vou, mas reclamo do caminho inteiro. E com razão.", ["mg", "ja", "me"]],
+      ["Topo na hora! Chamo a galera e a gente se vira pelo caminho.", ["an", "mu", "mo"]]
+    ]},
+    { q: "Você ganha R$ 50 mil de uma tia que nem sabia que tinha. Primeiro movimento:", o: [
+      ["Planilha. Reserva de emergência primeiro, sonho depois.", ["ti", "ci", "be"]],
+      ["Passagem só de ida para um lugar de que nunca ouvi falar.", ["ar", "ra", "au"]],
+      ["Divido com quem mais precisa e ainda sobra para a pizza.", ["bn", "mi", "an"]],
+      ["Abro o negócio dos meus sonhos e já contrato a equipe.", ["ja", "ry", "mo"]]
+    ]},
+    { q: "Alguém solta, na frente de todo mundo, que você é uma pessoa meio estranha. Você:", o: [
+      ["Agradeço. Estranho é o novo normal e eu sou a vanguarda.", ["me", "mg", "ra"]],
+      ["Respiro fundo e só respondo quando a cabeça esfriar.", ["el", "po", "ci"]],
+      ["Pergunto com curiosidade sincera o que exatamente foi estranho.", ["be", "ki", "mi"]],
+      ["Faço um discurso inflamado sobre respeito, justiça e boas maneiras.", ["ja", "an", "mu"]]
+    ]},
+    { q: "Você só pode levar uma mala numa viagem sem data de volta. O que entra primeiro?", o: [
+      ["Um livro, outro livro de reserva e, quem sabe, um terceiro.", ["be", "ki", "au"]],
+      ["Tintas, um violão e uma frigideira. Nunca se sabe.", ["ra", "ar", "ti"]],
+      ["Um caderno, um travesseiro bom e silêncio embalado a vácuo.", ["el", "au", "ci"]],
+      ["Um canivete, uma corda e planos B, C e D.", ["mu", "ry", "me"]]
+    ]},
+    { q: "O grupo está há 40 minutos brigando sobre onde jantar. Você:", o: [
+      ["Escuto cada lado até achar um lugar que agrade todo mundo.", ["po", "bn", "ci"]],
+      ["Já reservei. Chegamos às 20h. Sem discussão.", ["ti", "ja", "ry"]],
+      ["Proponho algo improvável: jantar no telhado, com fogareiro.", ["ra", "ar", "mu"]],
+      ["Fico em silêncio até alguém perceber que a melhor ideia veio de quem não falou.", ["mi", "el", "au"]]
+    ]},
+    { q: "Que tipo de vilão você derrotaria melhor?", o: [
+      ["Um que só precisa de um abraço e de uma conversa franca.", ["bn", "po", "an"]],
+      ["Um que fala demais. Comigo ele perde na ironia.", ["mg", "ja", "me"]],
+      ["Um que construiu um império e subestimou a minha paciência.", ["ci", "ry", "ki"]],
+      ["Um monstro mal-humorado que, no fundo, só quer ser compreendido.", ["be", "mi", "au"]]
+    ]},
+    { q: "O seu estilo de dança num casamento:", o: [
+      ["Coreografia ensaiada em segredo por três semanas.", ["ti", "mu", "ry"]],
+      ["Rodopio descalço na grama, sem plateia.", ["au", "ra", "me"]],
+      ["Danço com a tia, com o noivo e com o cachorro do salão.", ["an", "bn", "mo"]],
+      ["Observo, sorrio e só entro no refrão.", ["el", "mg", "ci"]]
+    ]},
+    { q: "Qual destas poderia ser a sua bio do Instagram?", o: [
+      ["Seguindo o vento. Sem manual de instruções.", ["mo", "ar", "me"]],
+      ["Pequenos gestos, grandes finais felizes.", ["bn", "ci", "au"]],
+      ["Ironia, café e zero paciência para gente sem noção.", ["mg", "ja", "me"]],
+      ["Curiosidade demais para ficar em casa.", ["ki", "ar", "be"]]
+    ]},
+    { q: "Última pergunta: o que você faz quando ninguém está olhando?", o: [
+      ["Escrevo no diário e fico horas olhando para o mar (ou para a janela).", ["mo", "el", "au"]],
+      ["Treino golpes no espelho e planejo estratégias de dominação mundial. Leves.", ["mu", "ry", "ki"]],
+      ["Converso com plantas, bichos e objetos inanimados.", ["bn", "ra", "mi"]],
+      ["Organizo a semana inteira e confiro se a conta fecha.", ["ti", "ci", "be"]]
+    ]}
+  ];
+
+  var REACT = [
+    "Anotado no caderninho real.",
+    "Hmm. Isso diz muito.",
+    "O espelho mágico ficou em silêncio.",
+    "Interessante. Preocupante, mas interessante.",
+    "A fada madrinha levantou a sobrancelha.",
+    "Os animais da floresta estão cochichando.",
+    "Resposta de quem tem história.",
+    "Boa. Pelo menos você é sincero(a).",
+    "Calculando o seu final feliz...",
+    "O reino inteiro está torcendo.",
+    "Quase lá. Respira.",
+    "Pronto. Vou consultar o oráculo."
+  ];
+
+  var $ = function (id) { return document.getElementById(id); };
+  var state = { qs: [], i: 0, answers: [], lock: false };
+
+  function shuffle(a) {
+    for (var i = a.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var t = a[i]; a[i] = a[j]; a[j] = t;
+    }
+    return a;
+  }
+
+  function show(which) {
+    ["intro", "quiz", "result"].forEach(function (id) { $(id).hidden = id !== which; });
+    window.scrollTo(0, 0);
+  }
+
+  function start() {
+    state.qs = Q.map(function (q) { return { q: q.q, o: shuffle(q.o.slice()) }; });
+    state.i = 0;
+    state.answers = [];
+    state.lock = false;
+    show("quiz");
+    render();
+  }
+
+  function render() {
+    var cur = state.qs[state.i];
+    var total = state.qs.length;
+    $("counter").textContent = "Pergunta " + (state.i + 1) + " de " + total;
+    $("barFill").style.width = (state.i / total * 100) + "%";
+    $("barWrap").setAttribute("aria-valuenow", String(state.i));
+    $("backBtn").disabled = state.i === 0;
+    $("qTitle").textContent = cur.q;
+    $("react").textContent = "";
+    var box = $("opts");
+    box.innerHTML = "";
+    cur.o.forEach(function (opt, idx) {
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "opt";
+      b.innerHTML = '<span class="k">' + "ABCD".charAt(idx) + '</span><span></span>';
+      b.lastChild.textContent = opt[0];
+      b.addEventListener("click", function () { choose(idx, b); });
+      box.appendChild(b);
+    });
+    var card = $("quizCard");
+    card.classList.remove("fade");
+    void card.offsetWidth;
+    card.classList.add("fade");
+  }
+
+  function choose(idx, btn) {
+    if (state.lock) return;
+    state.lock = true;
+    state.answers[state.i] = idx;
+    btn.classList.add("picked");
+    $("react").textContent = REACT[state.i % REACT.length];
+    setTimeout(function () {
+      state.lock = false;
+      if (state.i + 1 >= state.qs.length) {
+        $("barFill").style.width = "100%";
+        finish();
+      } else {
+        state.i++;
+        render();
+      }
+    }, 650);
+  }
+
+  function back() {
+    if (state.lock || state.i === 0) return;
+    state.i--;
+    state.answers.length = state.i;
+    render();
+  }
+
+  function finish() {
+    var score = {};
+    Object.keys(P).forEach(function (k) { score[k] = 0; });
+    state.answers.forEach(function (ans, qi) {
+      var tags = state.qs[qi].o[ans][1];
+      tags.forEach(function (t, n) { score[t] += n === 0 ? 2 : 1; });
+    });
+    var ranking = Object.keys(P).map(function (k) {
+      return { k: k, s: score[k], j: score[k] + Math.random() * 0.01 };
+    }).sort(function (a, b) { return b.j - a.j; });
+    showResult(ranking);
+  }
+
+  function showResult(r) {
+    var w = P[r[0].k];
+    var top = r[0].s || 1;
+    var also = r.slice(1, 3);
+    var el = $("result");
+    el.style.setProperty("--pc", w.color);
+    var chips = w.traits.map(function (t) { return '<span class="chip">' + t + "</span>"; }).join("");
+    var rows = also.map(function (x) {
+      var p = P[x.k];
+      var pct = Math.max(8, Math.round(x.s / top * 100));
+      return '<div class="row"><span class="nm">' + p.name + '</span><div class="track" aria-hidden="true"><span style="width:' + pct + '%;--c:' + p.color + '"></span></div></div>';
+    }).join("");
+    el.innerHTML =
+      '<article class="carta fade">' +
+        '<p class="eyebrow">O espelho mágico e a matemática dizem</p>' +
+        '<div class="top"><div class="emblem" aria-hidden="true">' + w.name.charAt(0) + '</div>' +
+        '<div><h2>' + w.name + '</h2><p class="film">' + w.film + '</p></div></div>' +
+        '<p class="desc">' + w.text + '</p>' +
+        '<div class="chips">' + chips + '</div>' +
+        '<div class="facts">' +
+          '<div class="fact"><b>Seu superpoder</b>' + w.power + '</div>' +
+          '<div class="fact"><b>Seu ponto fraco</b>' + w.flaw + '</div>' +
+        '</div>' +
+      '</article>' +
+      '<div class="also"><h3>Você também tem um pouco de</h3>' + rows + '</div>' +
+      '<div class="actions">' +
+        '<button class="btn" id="shareBtn" type="button">Copiar para mandar aos amigos</button>' +
+        '<button class="btn ghost" id="againBtn" type="button">Refazer o quiz</button>' +
+      '</div>' +
+      '<input class="share-field" id="shareField" readonly hidden aria-label="Texto para copiar">' +
+      '<p class="toast" id="toast" aria-live="polite"></p>';
+    show("result");
+    $("againBtn").addEventListener("click", start);
+    $("shareBtn").addEventListener("click", function () { share(w.name); });
+  }
+
+  function share(name) {
+    var text = "Fiz o quiz e saiu que eu sou a " + name + "! Descubra qual princesa você seria: " + location.href;
+    var field = $("shareField");
+    function fallback() {
+      field.hidden = false;
+      field.value = text;
+      field.focus();
+      field.select();
+      $("toast").textContent = "Selecione e copie o texto acima.";
+    }
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function () {
+          $("toast").textContent = "Copiado! Agora é só colar no grupo.";
+        }, fallback);
+      } else {
+        fallback();
+      }
+    } catch (e) { fallback(); }
+  }
+
+  $("startBtn").addEventListener("click", start);
+  $("backBtn").addEventListener("click", back);
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,614 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Qual Marca de Carro Você Seria</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;800&family=Barlow:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* Layout: coluna estreita, uma pergunta por vez, odômetro como progresso; resultado em forma de ficha do veículo com placa */
+:root {
+  --bg: #EDEFF2;
+  --fg: #12161C;
+  --muted: #566070;
+  --card: #FFFFFF;
+  --line: #D3D8DF;
+  --accent: #C91F17;
+  --accent-ink: #FFFFFF;
+  --ink-on-pc: #14181F;
+  --pc: #C91F17;
+  --font-display: "Barlow Condensed", "Arial Narrow", system-ui, sans-serif;
+  --font-body: "Barlow", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0F1318;
+    --fg: #F1F3F5;
+    --muted: #9AA5B4;
+    --card: #1A2028;
+    --line: #2E3744;
+    --accent: #FF5A4F;
+    --accent-ink: #1B0907;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0F1318;
+  --fg: #F1F3F5;
+  --muted: #9AA5B4;
+  --card: #1A2028;
+  --line: #2E3744;
+  --accent: #FF5A4F;
+  --accent-ink: #1B0907;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background-color: var(--bg);
+  background-image: repeating-linear-gradient(135deg, transparent 0 14px, color-mix(in srgb, var(--line) 55%, transparent) 14px 15px);
+  color: var(--fg);
+  font-family: var(--font-body);
+  font-size: 17px;
+  line-height: 1.5;
+  padding-block: 28px 56px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.wrap { max-width: 640px; margin: 0 auto; }
+h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; margin: 0; line-height: 1; text-transform: uppercase; }
+p { margin: 0; }
+button { font: inherit; color: inherit; cursor: pointer; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+
+.eyebrow { font-size: 13px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
+.card {
+  background: var(--card);
+  border: 2px solid var(--fg);
+  border-radius: 14px;
+  padding: clamp(20px, 5vw, 36px);
+  box-shadow: 6px 6px 0 var(--fg);
+}
+
+/* intro */
+.intro h1 { font-size: clamp(48px, 14vw, 84px); font-weight: 800; letter-spacing: -.005em; margin: 10px 0 16px; }
+.intro h1 em { font-style: normal; color: var(--accent); }
+.intro .lead { font-size: 19px; color: var(--muted); max-width: 46ch; }
+.intro .meta { display: flex; flex-wrap: wrap; gap: 8px; margin: 22px 0 26px; }
+.pill { border: 1.5px solid var(--line); border-radius: 6px; padding: 4px 12px; font-size: 14px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+.btn {
+  background: var(--accent); color: var(--accent-ink);
+  border: 2px solid var(--fg); border-radius: 10px;
+  padding: 13px 24px; font-family: var(--font-display); font-weight: 800; font-size: 22px; letter-spacing: .04em; text-transform: uppercase;
+  box-shadow: 3px 3px 0 var(--fg);
+  transition: transform .12s ease, box-shadow .12s ease;
+}
+.btn:hover { transform: translate(-1px, -1px); box-shadow: 4px 4px 0 var(--fg); }
+.btn:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--fg); }
+.btn.ghost { background: transparent; color: var(--fg); }
+
+/* quiz */
+.topbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
+.back { background: none; border: none; padding: 6px 0; color: var(--muted); font-weight: 700; }
+.back[disabled] { visibility: hidden; }
+.bar { height: 12px; border-radius: 4px; background: var(--line); overflow: hidden; margin-bottom: 20px; border: 1.5px solid var(--fg); }
+.bar > span { display: block; height: 100%; background: repeating-linear-gradient(90deg, var(--accent) 0 14px, color-mix(in srgb, var(--accent) 70%, var(--card)) 14px 18px); transition: width .35s ease; }
+.q-title { font-size: clamp(30px, 8vw, 42px); font-weight: 800; line-height: 1.02; margin-bottom: 22px; text-transform: none; letter-spacing: -.005em; }
+.opts { display: grid; gap: 10px; }
+.opt {
+  display: grid; grid-template-columns: 34px minmax(0, 1fr); align-items: start; gap: 12px;
+  text-align: left; background: var(--bg); border: 2px solid var(--line); border-radius: 10px;
+  padding: 13px 14px; transition: border-color .12s ease, transform .12s ease, background .12s ease;
+}
+.opt:hover { border-color: var(--fg); transform: translateX(3px); }
+.opt .k {
+  width: 34px; height: 34px; border-radius: 8px; display: grid; place-items: center;
+  font-family: var(--font-display); font-weight: 800; font-size: 20px; border: 2px solid var(--fg); background: var(--card);
+}
+.opt.picked { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 14%, var(--card)); }
+.opt.picked .k { background: var(--accent); color: var(--accent-ink); }
+.react { min-height: 26px; margin-top: 16px; color: var(--muted); font-style: italic; }
+
+/* result */
+.result { --pc: #C91F17; }
+.carta {
+  background: color-mix(in srgb, var(--pc) 14%, var(--card));
+  border: 2px solid var(--fg);
+  border-radius: 14px; box-shadow: 6px 6px 0 var(--fg);
+  padding: clamp(22px, 6vw, 38px);
+  border-top: 14px solid var(--pc);
+}
+/* a placa é um objeto físico: cores próprias nos dois temas */
+.plate {
+  display: block; width: fit-content; max-width: 100%; margin: 16px 0 18px;
+  background: #FFFFFF; color: #111418; border: 3px solid #111418; border-radius: 10px; overflow: hidden; text-align: center;
+}
+.plate .band { background: #1B4DB1; color: #FFFFFF; font-size: 11px; letter-spacing: .3em; font-weight: 700; padding: 2px 10px; }
+.plate .num { font-family: var(--font-display); font-weight: 800; font-size: clamp(28px, 9vw, 46px); letter-spacing: .06em; text-transform: uppercase; padding: 4px 22px 2px; overflow-wrap: anywhere; line-height: 1.1; }
+.persona { font-size: clamp(30px, 8.5vw, 46px); font-weight: 800; }
+.perfil { color: var(--muted); font-style: italic; margin: 8px 0 14px; }
+.desc { font-size: 18px; margin: 4px 0 20px; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 22px; }
+.chip { background: var(--pc); color: var(--ink-on-pc); border: 1.5px solid var(--fg); border-radius: 6px; padding: 3px 11px; font-weight: 700; font-size: 14px; text-transform: uppercase; letter-spacing: .05em; }
+.facts { display: grid; gap: 12px; margin-bottom: 4px; }
+.fact { border-top: 1.5px dashed var(--fg); padding-top: 12px; }
+.fact b { display: block; font-size: 13px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin-bottom: 2px; }
+.also { margin-top: 26px; }
+.also h3 { font-size: 26px; margin-bottom: 12px; }
+.row { display: grid; grid-template-columns: minmax(0, 1fr) 90px; gap: 12px; align-items: center; margin-bottom: 10px; }
+.row .nm { font-weight: 700; }
+.track { height: 12px; background: var(--line); border-radius: 4px; overflow: hidden; border: 1.5px solid var(--fg); }
+.track > span { display: block; height: 100%; background: var(--c, var(--accent)); }
+.actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+.share-field { width: 100%; margin-top: 14px; padding: 10px 12px; border: 2px solid var(--fg); border-radius: 8px; background: var(--card); color: var(--fg); font: inherit; font-size: 15px; }
+.toast { margin-top: 12px; color: var(--muted); font-weight: 700; min-height: 24px; }
+.foot { text-align: center; color: var(--muted); font-size: 14px; margin-top: 30px; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .fade { animation: up .35s ease both; }
+  @keyframes up { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+}
+body{margin:0}[hidden]{display:none!important}</style>
+</head>
+<body>
+
+
+<div class="wrap">
+
+  <section id="intro" class="card intro fade">
+    <p class="eyebrow">Vistoria de personalidade, sem validade no Detran</p>
+    <h1>Qual <em>marca de carro</em> você seria?</h1>
+    <p class="lead">Catorze perguntas, algumas completamente absurdas, e todas revelam mais do que você gostaria. Responda sem pisar no freio.</p>
+    <div class="meta">
+      <span class="pill">14 perguntas</span>
+      <span class="pill">23 marcas</span>
+      <span class="pill">uns 3 minutos</span>
+    </div>
+    <button class="btn" id="startBtn" type="button">Dar a partida</button>
+  </section>
+
+  <section id="quiz" hidden>
+    <div class="card fade" id="quizCard">
+      <div class="topbar">
+        <button class="back" id="backBtn" type="button">← Voltar</button>
+        <span class="eyebrow" id="counter"></span>
+      </div>
+      <div class="bar" role="progressbar" aria-label="Progresso do quiz" aria-valuemin="0" aria-valuemax="14" id="barWrap"><span id="barFill" style="width:0%"></span></div>
+      <h2 class="q-title" id="qTitle"></h2>
+      <div class="opts" id="opts" role="group" aria-labelledby="qTitle"></div>
+      <p class="react" id="react" aria-live="polite"></p>
+    </div>
+  </section>
+
+  <section id="result" class="result" hidden></section>
+
+  <p class="foot">Feito com carinho, gasolina aditivada e zero rigor científico.</p>
+</div>
+
+<script>
+(function () {
+  var B = {
+    fe: { name: "Ferrari", persona: "A estrela inacessível", color: "#F0483E",
+      traits: ["Rara", "Cara", "Poderosa", "Vaidosa", "Competitiva", "Apaixonante"],
+      perfil: "Gosta de ser admirada e sabe que chama atenção.",
+      text: "Você entra e o ambiente muda de temperatura. Rara, cara e consciente disso, você não corre atrás de atenção: ela já vem com o motor ligado.",
+      capo: "Carisma V12 e uma agenda sempre lotada.",
+      consumo: "Elogios. Muitos. De manhã e à noite.",
+      recall: "Não aceita ser a segunda opção nem na sobremesa." },
+    po: { name: "Porsche", persona: "O executivo brilhante", color: "#B5BEC9",
+      traits: ["Inteligente", "Sofisticada", "Disciplinada", "Discreta", "Competitiva"],
+      perfil: "Não precisa provar nada para ninguém.",
+      text: "Você tem aquele talento de ser brilhante sem fazer barulho. Disciplina de atleta, discrição de cofre e um brilho que dispensa apresentações.",
+      capo: "Cérebro turbo com precisão de relógio suíço.",
+      consumo: "Poucas palavras e muita eficiência.",
+      recall: "Esquece que o plano também pode parar para um café." },
+    mb: { name: "Mercedes-Benz", persona: "O aristocrata tradicional", color: "#D8C27A",
+      traits: ["Elegante", "Tradicional", "Poderosa", "Madura", "Refinada", "Conservadora"],
+      perfil: "Valoriza posição social, conforto e reconhecimento.",
+      text: "Você preza pela elegância e pela tradição. Chega com postura, escolhe o melhor assento da sala e raramente é pega de surpresa.",
+      capo: "Poder silencioso e uma coleção de bons modos.",
+      consumo: "Conforto, reconhecimento e banco de couro.",
+      recall: "Resistência a qualquer coisa que seja “só uma tendência”." },
+    bm: { name: "BMW", persona: "O competitivo ambicioso", color: "#5F8FF0",
+      traits: ["Ambiciosa", "Confiante", "Independente", "Dinâmica", "Ousada", "Arrogante"],
+      perfil: "Gosta de desafios e de estar à frente.",
+      text: "Competitiva, confiante e sempre um passo à frente. Você vê desafio em tudo, até na fila do pão, e já está pensando em como ganhar.",
+      capo: "Ambição turbo e agenda de CEO.",
+      consumo: "Metas, desafios e muito café.",
+      recall: "Esquece de dar seta: muda de planos sem avisar ninguém." },
+    au: { name: "Audi", persona: "O intelectual sofisticado", color: "#7BC8C8",
+      traits: ["Inteligente", "Tecnológica", "Reservada", "Elegante", "Racional", "Moderna"],
+      perfil: "Tem bom gosto e não sente necessidade de ostentar.",
+      text: "Gosto refinado, raciocínio rápido e zero necessidade de aplauso. Você resolve tudo com tecnologia e ainda deixa o ambiente mais elegante.",
+      capo: "Inteligência de laboratório e design de museu.",
+      consumo: "Silêncio, bons dados e acabamento impecável.",
+      recall: "É tão reservada que ninguém sabe se está feliz ou só calculando." },
+    la: { name: "Lamborghini", persona: "O extravagante", color: "#F5D31F",
+      traits: ["Extravagante", "Impulsiva", "Ousada", "Intensa", "Vaidosa", "Provocadora"],
+      perfil: "Quer ser notada e não tem vergonha disso.",
+      text: "Você não entra, você irrompe. Extravagante, intensa e sem vergonha nenhuma, quer ser vista e ouvida, de preferência com trilha sonora própria.",
+      capo: "Ousadia V12 sem freio de mão.",
+      consumo: "Atenção, adrenalina e cheiro de pneu queimado.",
+      recall: "Não sabe estacionar discretamente. Nem quer." },
+    vw: { name: "Volkswagen", persona: "O trabalhador confiável", color: "#7FD1A0",
+      traits: ["Prática", "Confiável", "Popular", "Racional", "Trabalhadora", "Tradicional"],
+      perfil: "Valoriza aquilo que funciona e evita complicações.",
+      text: "Prática, confiável e querida por gente de todas as idades. Você é quem funciona de segunda a domingo e nunca dá problema na hora errada.",
+      capo: "Praticidade turbo e vontade de trabalhar de dar inveja.",
+      consumo: "Pouco. E rende muito.",
+      recall: "Demora a aceitar que um luxo às vezes também é necessário." },
+    to: { name: "Toyota", persona: "O responsável disciplinado", color: "#F28C6B",
+      traits: ["Responsável", "Disciplinada", "Conservadora", "Confiável", "Inteligente", "Consistente"],
+      perfil: "É aquela em quem todos confiam.",
+      text: "Todo mundo sabe que pode contar com você, e é por isso que você nunca pode faltar. Disciplina, consistência e uma lista de tarefas sempre atualizada.",
+      capo: "Confiança de 200 mil quilômetros sem trocar peça.",
+      consumo: "Rotina, planejamento e uma economia de dar orgulho.",
+      recall: "Nunca atrasa, nunca erra. É meio assustador." },
+    ho: { name: "Honda", persona: "O estudioso independente", color: "#E86A8A",
+      traits: ["Inteligente", "Estudiosa", "Independente", "Disciplinada", "Discreta", "Competente"],
+      perfil: "Tem personalidade própria e gosta de fazer bem-feito.",
+      text: "Estudiosa, independente e competente, você faz bem-feito mesmo quando ninguém olha. Tem personalidade própria e jeito de quem leu o manual inteiro.",
+      capo: "Cérebro afiado e motor de disciplina.",
+      consumo: "Cursos, livros e um café depois do almoço.",
+      recall: "Pode virar o especialista chato da mesa. Com carinho." },
+    ch: { name: "Chevrolet", persona: "O popular carismático", color: "#F5B63B",
+      traits: ["Extrovertida", "Popular", "Versátil", "Sociável", "Forte", "Tradicional"],
+      perfil: "Sabe agradar diferentes públicos e se adaptar.",
+      text: "Você agrada todo mundo, da tia ao colega de trabalho, sem perder a pose. Extrovertida, versátil e muito querida, se adapta a qualquer festa, cardápio ou assunto.",
+      capo: "Simpatia turbinada e disposição de ônibus lotado.",
+      consumo: "Conversa, comida boa e playlist coletiva.",
+      recall: "Dificuldade em dizer não a qualquer convite." },
+    fi: { name: "Fiat", persona: "O brasileiro versátil", color: "#B6D957",
+      traits: ["Comunicativa", "Simples", "Versátil", "Econômica", "Sociável", "Trabalhadora"],
+      perfil: "Conquista pela praticidade e proximidade.",
+      text: "Comunicativa, simples e econômica, você conquista pelo jeito próximo. Tem aquele jeitinho brasileiro de resolver tudo com praticidade e simpatia.",
+      capo: "Motor 1.0 de jeitinho e boa vontade.",
+      consumo: "Pouco combustível e muito papo.",
+      recall: "Promete “cinco minutinhos” e aparece em quarenta." },
+    re: { name: "Renault", persona: "O alternativo criativo", color: "#C58CF0",
+      traits: ["Criativa", "Independente", "Alternativa", "Econômica", "Inteligente", "Incompreendida"],
+      perfil: "Gosta de seguir o próprio caminho.",
+      text: "Criativa e independente, você segue o próprio caminho mesmo que ninguém entenda. O mundo ainda vai te descobrir, mas você nem liga.",
+      capo: "Criatividade em estado bruto e opinião própria.",
+      consumo: "Pouco, e com muita ideia.",
+      recall: "Nem sempre explica o que quis dizer. Quem entende, entende." },
+    vo: { name: "Volvo", persona: "O protetor equilibrado", color: "#5FB0C9",
+      traits: ["Madura", "Responsável", "Protetora", "Inteligente", "Discreta", "Sofisticada"],
+      perfil: "Prefere segurança e qualidade de vida à ostentação.",
+      text: "Madura, responsável e protetora, você é a pessoa que lembra de levar guarda-chuva, carregador e kit de primeiros socorros para todo mundo. Sofisticação sem alarde.",
+      capo: "Cuidado em forma de gente, com airbag emocional.",
+      consumo: "Segurança, qualidade de vida e muito chá.",
+      recall: "Sofre quando alguém não usa cinto de segurança. Ou casaco." },
+    lr: { name: "Land Rover", persona: "O aventureiro sofisticado", color: "#8DB36B",
+      traits: ["Aventureira", "Forte", "Independente", "Corajosa", "Sofisticada", "Autoconfiante"],
+      perfil: "Gosta de desafios sem abrir mão do conforto.",
+      text: "Aventureira, corajosa e autoconfiante, você encara estrada de terra de botina e ainda chega com estilo. Gosta de desafio, mas dispensa o sofrimento desnecessário.",
+      capo: "Tração nas quatro rodas e na vida inteira.",
+      consumo: "Trilhas, imprevistos e conforto no final.",
+      recall: "Quebra no meio do nada, mas com muita elegância." },
+    mi: { name: "MINI", persona: "O criativo irreverente", color: "#FF8A5C",
+      traits: ["Divertida", "Irreverente", "Criativa", "Carismática", "Estilosa", "Espontânea"],
+      perfil: "Não precisa ser grande para ter personalidade.",
+      text: "Pequena no espaço, enorme em personalidade. Divertida, irreverente e cheia de estilo, você prova que carisma não depende de tamanho.",
+      capo: "Espontaneidade de kart e senso de humor afiado.",
+      consumo: "Risada, cor e playlist boa.",
+      recall: "Ocupa pouco espaço, mas todo mundo te nota." },
+    le: { name: "Lexus", persona: "O milionário discreto", color: "#D3B7A0",
+      traits: ["Refinada", "Educada", "Organizada", "Discreta", "Exigente", "Gentil"],
+      perfil: "Tem dinheiro e cultura, mas não precisa demonstrar superioridade.",
+      text: "Educada, refinada e discreta, você tem dinheiro e cultura, mas nunca precisa mostrar. O seu luxo é o silêncio e o capricho nos detalhes.",
+      capo: "Elegância híbrida com motor silencioso.",
+      consumo: "Chá, boas maneiras e perfeição em tudo.",
+      recall: "Se algo está meio centímetro torto, você nota. E sofre." },
+    te: { name: "Tesla", persona: "O visionário controverso", color: "#A0A8F5",
+      traits: ["Inovadora", "Visionária", "Tecnológica", "Ambiciosa", "Controversa", "Questionadora"],
+      perfil: "Acredita que o futuro deve ser diferente.",
+      text: "Inovadora, visionária e questionadora, você acredita que o futuro deveria ser diferente e já está fazendo a ideia acontecer. Alguns amam, outros torcem o nariz.",
+      capo: "Ideia grande e bateria cheia.",
+      consumo: "Ambição, cafeína e posts às 3h da manhã.",
+      recall: "A atualização de personalidade chega sem aviso." },
+    su: { name: "Subaru", persona: "O independente leal", color: "#4FB0A0",
+      traits: ["Leal", "Técnica", "Resistente", "Aventureira", "Independente", "Excêntrica"],
+      perfil: "Não busca aprovação e faz o que gosta.",
+      text: "Leal, técnica e resistente, você faz o que gosta sem pedir aprovação. Excêntrica na medida certa, tem fãs fiéis e um mundo que não entende.",
+      capo: "Tração integral de lealdade e uma coleção de coisas inusitadas.",
+      consumo: "Trilha, café e curiosidade técnica.",
+      recall: "Prefere o próprio caminho, mesmo quando a estrada está pronta." },
+    ma: { name: "Mazda", persona: "O apaixonado por experiências", color: "#7DB7E8",
+      traits: ["Sensível", "Criativa", "Inteligente", "Apaixonada", "Elegante", "Detalhista"],
+      perfil: "Valoriza experiências e prazer.",
+      text: "Sensível, criativa e detalhista, você valoriza o prazer de um bom momento. Elegante sem esforço, sente a vida como quem dirige numa estrada vazia com a música certa.",
+      capo: "Paixão pelo detalhe e pelo caminho, não só pelo destino.",
+      consumo: "Boa comida, boa música e boa luz.",
+      recall: "Chora com comercial de margarina." },
+    je: { name: "Jeep", persona: "O espírito livre", color: "#C9A15A",
+      traits: ["Corajosa", "Aventureira", "Resistente", "Livre", "Espontânea", "Teimosa"],
+      perfil: "Não gosta de receber ordens e prefere o próprio caminho.",
+      text: "Livre, corajosa e teimosa, você não aceita ordem nem de GPS. Prefere abrir o próprio caminho a seguir qualquer rota e já voltou com lama até o capô mais de uma vez.",
+      capo: "Espírito de aventura e tração 4x4 de teimosia.",
+      consumo: "Natureza, liberdade e imprevistos.",
+      recall: "Sai do caminho e culpa o mapa." },
+    mt: { name: "Mitsubishi", persona: "O guerreiro determinado", color: "#D96A4A",
+      traits: ["Determinada", "Robusta", "Disciplinada", "Técnica", "Competitiva", "Resiliente"],
+      perfil: "Gosta de superar obstáculos.",
+      text: "Determinada, resiliente e robusta, você transforma obstáculo em oportunidade de mostrar que aguenta. Disciplina de rali e paciência de quem já ganhou na marra.",
+      capo: "Resiliência de maratonista.",
+      consumo: "Superação, café preto e um plano B de aço.",
+      recall: "Não sabe pedir ajuda nem quando o pneu já furou." },
+    ar: { name: "Alfa Romeo", persona: "O sedutor temperamental", color: "#D4607E",
+      traits: ["Apaixonada", "Charmosa", "Intensa", "Artística", "Temperamental", "Sedutora"],
+      perfil: "Tem personalidade de sobra e nem sempre é fácil de conviver.",
+      text: "Apaixonada, charmosa e artística, você tem personalidade de sobra e nem sempre é fácil de conviver. Ninguém fica indiferente, mas todo mundo sabe que a bagunça vale a pena.",
+      capo: "Charme italiano e drama em doses generosas.",
+      consumo: "Paixão, vinho e música alta.",
+      recall: "Dia sim, dia não, oficina emocional. E vale a pena." },
+    by: { name: "BYD", persona: "A desafiante que chegou para ficar", color: "#9AD14F",
+      traits: ["Inovadora", "Ambiciosa", "Tecnológica", "Pragmática", "Competitiva", "Fabuloso", "Divonica", "Babadeira", "Ousada"],
+      perfil: "Chegou para desafiar os tradicionais e conquistar espaço rapidamente.",
+      text: "Inovadora, ambiciosa e pragmática, você chegou para desafiar os tradicionais e conquistar espaço rapidamente. Fabulosa, divônica e babadeira, você faz o rival repensar a estratégia inteira.",
+      capo: "Tecnologia de ponta, preço que assusta e muito babado.",
+      consumo: "Ambição e carregador rápido.",
+      recall: "Quando você entra na festa, os tradicionais ficam nervosos." }
+  };
+
+  var Q = [
+    { q: "Você chega ao restaurante e o garçom diz que não há mesa. Você:", o: [
+      ["Digo o meu nome devagar. A mesa aparece em dois minutos.", ["fe", "mb", "la"]],
+      ["Peço desculpas pelo incômodo, volto outro dia e deixo gorjeta pelo trabalho dele.", ["le", "to", "vo"]],
+      ["Pergunto o que tem na cozinha e sento no balcão mesmo. Está ótimo.", ["fi", "ch", "je"]],
+      ["Abro o app: reservei há três semanas e já tenho o comprovante.", ["po", "au", "ho"]]
+    ]},
+    { q: "A sua playlist de domingo de manhã:", o: [
+      ["Ópera, jazz e um podcast de economia em 1,5x.", ["mb", "ma", "au"]],
+      ["Trilha de filme de ação, volume no talo, janela aberta.", ["la", "je", "lr"]],
+      ["Tudo que a minha tia mandou no WhatsApp, em ordem aleatória.", ["ch", "fi", "vw"]],
+      ["Uma banda que só eu conheço e que um dia vai ficar famosa.", ["re", "su", "mi"]]
+    ]},
+    { q: "Um alienígena pergunta como você define sucesso. Você responde:", o: [
+      ["Que falem de mim em salas onde eu nunca entrei.", ["fe", "la", "ar"]],
+      ["Todo mundo que eu amo chegar em casa em segurança.", ["vo", "to", "ho"]],
+      ["Fazer algo que ninguém achava possível. De preferência com um foguete.", ["te", "by", "bm"]],
+      ["Fazer bem o que me propus e não precisar contar para ninguém.", ["po", "ho", "le"]]
+    ]},
+    { q: "Seu fim de semana ideal:", o: [
+      ["Trilha de catorze horas numa região sem sinal de celular.", ["lr", "su", "je"]],
+      ["Almoço de quatro horas com a família, mesa grande, ninguém com pressa.", ["ch", "fi", "vw"]],
+      ["Spa, um livro de arte e um jantar em que só eu entendo o prato.", ["ma", "le", "au"]],
+      ["Pista de corrida, cronômetro e uma rivalidade pessoal com o ponteiro.", ["fe", "mt", "bm"]]
+    ]},
+    { q: "Alguém pisa no seu pé no metrô. Sua reação:", o: [
+      ["Olho de um jeito que a pessoa repensa a vida.", ["ar", "bm", "la"]],
+      ["Peço que tome cuidado, com educação absoluta.", ["le", "mb", "to"]],
+      ["Faço uma piada que arranca risada do vagão inteiro.", ["mi", "ch", "fi"]],
+      ["Escrevo mentalmente um tratado sobre o transporte público.", ["au", "te", "re"]]
+    ]},
+    { q: "Você ganha um superpoder para usar em reunião de trabalho. Qual?", o: [
+      ["Aparecer em todas as telas ao mesmo tempo, com iluminação perfeita.", ["fe", "la", "by"]],
+      ["Resolver qualquer planilha quebrada sem reclamar.", ["vw", "to", "fi"]],
+      ["Prever o futuro e já ter um produto pronto para ele.", ["te", "by", "bm"]],
+      ["Aguentar quatro horas de reunião que poderia ser um e-mail, sem piscar.", ["mt", "ho", "su"]]
+    ]},
+    { q: "Qual destes é o seu pior pesadelo?", o: [
+      ["Ficar preso no trânsito, de roupa social, sem ar-condicionado.", ["mb", "le", "vo"]],
+      ["Descobrir que três pessoas na festa estão com o mesmo look que o meu.", ["fe", "la", "mi"]],
+      ["Seguir roteiro de excursão sem poder descer do ônibus.", ["je", "lr", "re"]],
+      ["Perder um prazo. Qualquer prazo.", ["to", "vo", "mt"]]
+    ]},
+    { q: "Um amigo liga de madrugada dizendo que precisa de ajuda. Você:", o: [
+      ["Chego em dez minutos, de pijama, com garrafa térmica e lanterna.", ["su", "lr", "mt"]],
+      ["Escuto e já proponho um plano de ação em três etapas.", ["po", "ho", "to"]],
+      ["Atendo no segundo toque, levando sanduíche e meio quarteirão de notícias.", ["ch", "fi", "mi"]],
+      ["Peço detalhes. Tem algo no relato que não bate e eu vou descobrir.", ["au", "te", "re"]]
+    ]},
+    { q: "Você vai fazer uma tatuagem. O que escolhe?", o: [
+      ["Algo pequeno, discreto, com um significado que só eu sei.", ["ma", "po", "le"]],
+      ["Uma frase em italiano sobre amor e drama.", ["ar", "ma", "fe"]],
+      ["Um desenho colorido, feito por um amigo, sem moldura nenhuma.", ["mi", "re", "by"]],
+      ["Nenhuma. Ninguém me diz o que fazer com a minha pele.", ["lr", "je", "bm"]]
+    ]},
+    { q: "Escolha uma festa:", o: [
+      ["Baile de gala, taça de cristal e gente de sobrenome importante.", ["mb", "le", "po"]],
+      ["Festival de música, lama até o joelho e barraca montada às pressas.", ["je", "su", "lr"]],
+      ["Uma festa que eu organizei, com tema, cenografia e DJ contratado.", ["bm", "la", "by"]],
+      ["Churrasco de laje com som alto e a vizinhança inteira convidada.", ["ch", "vw", "fi"]]
+    ]},
+    { q: "Um robô pede conselho sobre como deve ser. Você diz:", o: [
+      ["Elétrico, silencioso e capaz de dominar o mundo educadamente.", ["te", "by", "au"]],
+      ["Confiável e resistente. Ligar de manhã e funcionar por vinte anos.", ["to", "vw", "mt"]],
+      ["Sensível: que sinta a música, o cheiro de café e o pôr do sol.", ["ma", "ar", "vo"]],
+      ["Esquisito e adorável, com cara de brinquedo e atitude de chefe.", ["mi", "re", "su"]]
+    ]},
+    { q: "Criticaram o seu trabalho em público. Como você reage?", o: [
+      ["Respondo com um print, uma frase afiada e uma risada.", ["bm", "ar", "la"]],
+      ["Agradeço, anoto e melhoro em silêncio. Os resultados falam.", ["ho", "po", "le"]],
+      ["Concordo em parte e convido para um café para conversar.", ["vw", "ch", "vo"]],
+      ["Se criticaram, estou fazendo algo certo. Vou dobrar a aposta.", ["te", "by", "re"]]
+    ]},
+    { q: "Qual é a sua relação com dinheiro?", o: [
+      ["Pago o que vale. Qualidade primeiro, preço depois.", ["mb", "le", "au"]],
+      ["Se for gastar, que seja numa experiência inesquecível.", ["ma", "fe", "ar"]],
+      ["Controle total. Cada centavo tem destino.", ["to", "vw", "fi"]],
+      ["Invisto em coisas ousadas e tecnologia de ponta.", ["te", "by", "bm"]]
+    ]},
+    { q: "Última pergunta: o que comentam de você quando você sai da sala?", o: [
+      ["Quem era? Alguém sabe? Meu Deus, que presença.", ["fe", "la", "ar"]],
+      ["Pode confiar. Se falou, está falado.", ["to", "ho", "vo"]],
+      ["Aquela pessoa é estranha. E eu adoro.", ["re", "su", "mi"]],
+      ["Sempre chega primeiro, sai por último e nunca perde a pose.", ["bm", "mt", "po"]]
+    ]}
+  ];
+
+  var REACT = [
+    "Anotado na prancheta da vistoria.",
+    "Hmm. A luz do motor acendeu.",
+    "O frentista não esperava essa.",
+    "Calibrando os pneus da sua personalidade...",
+    "Teste de rodagem em andamento.",
+    "Passou na inspeção. Por enquanto.",
+    "O mecânico levantou a sobrancelha.",
+    "Boa. Isso pede um tanque cheio.",
+    "O GPS está recalculando você.",
+    "Essa resposta tem torque.",
+    "Quase na linha de chegada.",
+    "Hora de abastecer o suspense.",
+    "Última volta. Segura o volante.",
+    "Pronto. Consultando o Detran do destino."
+  ];
+
+  var $ = function (id) { return document.getElementById(id); };
+  var state = { qs: [], i: 0, answers: [], lock: false };
+
+  function shuffle(a) {
+    for (var i = a.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var t = a[i]; a[i] = a[j]; a[j] = t;
+    }
+    return a;
+  }
+
+  function show(which) {
+    ["intro", "quiz", "result"].forEach(function (id) { $(id).hidden = id !== which; });
+    window.scrollTo(0, 0);
+  }
+
+  function start() {
+    state.qs = Q.map(function (q) { return { q: q.q, o: shuffle(q.o.slice()) }; });
+    state.i = 0;
+    state.answers = [];
+    state.lock = false;
+    show("quiz");
+    render();
+  }
+
+  function render() {
+    var cur = state.qs[state.i];
+    var total = state.qs.length;
+    $("counter").textContent = "Quilômetro " + (state.i + 1) + " de " + total;
+    $("barFill").style.width = (state.i / total * 100) + "%";
+    $("barWrap").setAttribute("aria-valuenow", String(state.i));
+    $("backBtn").disabled = state.i === 0;
+    $("qTitle").textContent = cur.q;
+    $("react").textContent = "";
+    var box = $("opts");
+    box.innerHTML = "";
+    cur.o.forEach(function (opt, idx) {
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "opt";
+      b.innerHTML = '<span class="k">' + "ABCD".charAt(idx) + '</span><span></span>';
+      b.lastChild.textContent = opt[0];
+      b.addEventListener("click", function () { choose(idx, b); });
+      box.appendChild(b);
+    });
+    var card = $("quizCard");
+    card.classList.remove("fade");
+    void card.offsetWidth;
+    card.classList.add("fade");
+  }
+
+  function choose(idx, btn) {
+    if (state.lock) return;
+    state.lock = true;
+    state.answers[state.i] = idx;
+    btn.classList.add("picked");
+    $("react").textContent = REACT[state.i % REACT.length];
+    setTimeout(function () {
+      state.lock = false;
+      if (state.i + 1 >= state.qs.length) {
+        $("barFill").style.width = "100%";
+        finish();
+      } else {
+        state.i++;
+        render();
+      }
+    }, 650);
+  }
+
+  function back() {
+    if (state.lock || state.i === 0) return;
+    state.i--;
+    state.answers.length = state.i;
+    render();
+  }
+
+  function finish() {
+    var score = {};
+    Object.keys(B).forEach(function (k) { score[k] = 0; });
+    state.answers.forEach(function (ans, qi) {
+      var tags = state.qs[qi].o[ans][1];
+      tags.forEach(function (t, n) { score[t] += n === 0 ? 2 : 1; });
+    });
+    var ranking = Object.keys(B).map(function (k) {
+      return { k: k, s: score[k], j: score[k] + Math.random() * 0.01 };
+    }).sort(function (a, b) { return b.j - a.j; });
+    showResult(ranking);
+  }
+
+  function showResult(r) {
+    var w = B[r[0].k];
+    var top = r[0].s || 1;
+    var also = r.slice(1, 3);
+    var el = $("result");
+    el.style.setProperty("--pc", w.color);
+    var chips = w.traits.map(function (t) { return '<span class="chip">' + t + "</span>"; }).join("");
+    var rows = also.map(function (x) {
+      var p = B[x.k];
+      var pct = Math.max(8, Math.round(x.s / top * 100));
+      return '<div class="row"><span class="nm">' + p.name + '</span><div class="track" aria-hidden="true"><span style="width:' + pct + '%;--c:' + p.color + '"></span></div></div>';
+    }).join("");
+    el.innerHTML =
+      '<article class="carta fade">' +
+        '<p class="eyebrow">Resultado da vistoria</p>' +
+        '<div class="plate" role="img" aria-label="Placa: ' + w.name + '"><div class="band">BRASIL</div><div class="num">' + w.name + '</div></div>' +
+        '<h2 class="persona">' + w.persona + '</h2>' +
+        '<p class="perfil">' + w.perfil + '</p>' +
+        '<p class="desc">' + w.text + '</p>' +
+        '<div class="chips">' + chips + '</div>' +
+        '<div class="facts">' +
+          '<div class="fact"><b>Sob o capô</b>' + w.capo + '</div>' +
+          '<div class="fact"><b>Consumo</b>' + w.consumo + '</div>' +
+          '<div class="fact"><b>Chamado de recall</b>' + w.recall + '</div>' +
+        '</div>' +
+      '</article>' +
+      '<div class="also"><h3>Também estacionadas na sua garagem</h3>' + rows + '</div>' +
+      '<div class="actions">' +
+        '<button class="btn" id="shareBtn" type="button">Copiar para os amigos</button>' +
+        '<button class="btn ghost" id="againBtn" type="button">Refazer</button>' +
+      '</div>' +
+      '<input class="share-field" id="shareField" readonly hidden aria-label="Texto para copiar">' +
+      '<p class="toast" id="toast" aria-live="polite"></p>';
+    show("result");
+    $("againBtn").addEventListener("click", start);
+    $("shareBtn").addEventListener("click", function () { share(w.name); });
+  }
+
+  function share(name) {
+    var text = "Fiz o quiz e a minha personalidade é pura " + name + "! Descubra qual marca de carro você seria: " + location.href;
+    var field = $("shareField");
+    function fallback() {
+      field.hidden = false;
+      field.value = text;
+      field.focus();
+      field.select();
+      $("toast").textContent = "Selecione e copie o texto acima.";
+    }
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function () {
+          $("toast").textContent = "Copiado! Agora é só colar no grupo.";
+        }, fallback);
+      } else {
+        fallback();
+      }
+    } catch (e) { fallback(); }
+  }
+
+  $("startBtn").addEventListener("click", start);
+  $("backBtn").addEventListener("click", back);
+})();
+</script>
+
+</body>
+</html>
