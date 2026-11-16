@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quiz Marvel: qual personagem é você?</title>
+<meta name="description" content="Quiz de personalidade divertido: descubra qual personagem da Marvel combina com você.">
+<style>
+:root{--bg:#faf9f5;--card:#fff;--soft:#f1efe8;--text:#1f1e1d;--muted:#5f5e5a;--line:#d9d6cc;--accent:#185fa5;--accent-bg:#e6f1fb;--accent-text:#0c447c}
+@media (prefers-color-scheme:dark){:root{--bg:#1f1e1d;--card:#2a2927;--soft:#353432;--text:#f1efe8;--muted:#b4b2a9;--line:#4a4844;--accent:#85b7eb;--accent-bg:#0c447c;--accent-text:#b5d4f4}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.6}
+main{max-width:560px;margin:0 auto;padding:24px 16px 48px}
+h1{font-size:24px;font-weight:500;margin:0 0 4px}
+.sub{color:var(--muted);font-size:14px;margin:0 0 24px}
+.small{font-size:13px;color:var(--muted);margin:0 0 6px}
+.bar{height:4px;background:var(--soft);border-radius:2px;margin:0 0 16px}
+.bar>div{height:4px;background:var(--accent);border-radius:2px}
+.q{font-size:19px;font-weight:500;line-height:1.4;margin:0 0 16px}
+button{font:inherit;color:inherit;background:transparent;border:1px solid var(--line);border-radius:8px;cursor:pointer;padding:12px 14px}
+button:hover{background:var(--soft)}
+button:active{transform:scale(.98)}
+.opt{display:block;width:100%;text-align:left;margin:0 0 8px;line-height:1.4}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px;text-align:center;margin:0 0 16px}
+.av{width:64px;height:64px;border-radius:50%;background:var(--accent-bg);color:var(--accent-text);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:500;margin:0 auto 10px}
+.name{font-size:24px;font-weight:500;margin:0 0 4px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+.chip{font-size:12px;padding:4px 10px;border-radius:8px;background:var(--soft);color:var(--muted)}
+.chip.hit{background:var(--accent-bg);color:var(--accent-text)}
+.row{display:flex;justify-content:space-between;font-size:13px;margin:0 0 4px}
+.track{height:6px;background:var(--soft);border-radius:3px;margin:0 0 10px}
+.track>div{height:6px;background:var(--accent);border-radius:3px}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+footer{margin-top:32px;font-size:12px;color:var(--muted);text-align:center}
+</style>
+</head>
+<body>
+<main>
+<h1>Quiz Marvel</h1>
+<p class="sub">Qual personagem combina com você? Dez perguntas, zero seriedade.</p>
+<div id="app"></div>
+<footer>Quiz feito por diversão. Personagens e marcas pertencem aos seus respectivos donos.</footer>
+</main>
+<script>
+var RAW="Tony Stark;Inteligente, Sarcástico, Criativo, Confiante, Egocêntrico, Inovador, Impulsivo, Estrategista\nSteve Rogers;Honesto, Íntegro, Leal, Corajoso, Disciplinado, Idealista, Justo, Determinado\nNatasha Romanoff;Astuta, Observadora, Estratégica, Reservada, Resiliente, Leal, Calculista, Adaptável\nThor;Corajoso, Impulsivo, Leal, Orgulhoso, Bem-humorado, Protetor, Emocional, Resiliente\nBruce Banner;Inteligente, Racional, Introspectivo, Humilde, Cauteloso, Sensível, Analítico, Inseguro\nClint Barton;Leal, Disciplinado, Observador, Pragmático, Protetor, Discreto, Responsável, Persistente\nPeter Parker;Curioso, Inteligente, Altruísta, Humilde, Ansioso, Otimista, Responsável, Espontâneo\nStephen Strange;Arrogante, Brilhante, Analítico, Independente, Estratégico, Exigente, Determinado, Controlador\nWanda Maximoff;Emocional, Intensa, Sensível, Determinada, Protetora, Resiliente, Apaixonada, Vulnerável\nVision;Racional, Ponderado, Curioso, Filosófico, Empático, Ético, Paciente, Diplomático\nSam Wilson;Empático, Conciliador, Humilde, Responsável, Justo, Diplomático, Leal, Equilibrado\nBucky Barnes;Reservado, Resiliente, Leal, Introspectivo, Desconfiado, Persistente, Protetor, Determinado\nT'Challa;Sábio, Diplomático, Íntegro, Humilde, Justo, Estratégico, Equilibrado, Responsável\nShuri;Inventiva, Inteligente, Irreverente, Curiosa, Independente, Sarcástica, Questionadora, Confiante\nPeter Quill;Carismático, Impulsivo, Brincalhão, Emocional, Espontâneo, Inseguro, Leal, Criativo\nGamora;Determinada, Disciplinada, Independente, Pragmática, Reservada, Corajosa, Protetora, Estratégica\nRocket Raccoon;Sarcástico, Inteligente, Desconfiado, Inventivo, Individualista, Impulsivo, Sensível, Resiliente\nGroot;Leal, Gentil, Altruísta, Protetor, Paciente, Inocente, Companheiro, Corajoso\nDrax;Honesto, Literal, Impulsivo, Corajoso, Leal, Direto, Emocional, Ingênuo\nMantis;Sensível, Empática, Gentil, Intuitiva, Espontânea, Ingênua, Acolhedora, Sincera\nLoki;Manipulador, Inteligente, Ambicioso, Estratégico, Vaidoso, Persuasivo, Inseguro, Oportunista\nThanos;Determinado, Autoritário, Calculista, Convicto, Inflexível, Disciplinado, Pragmático, Radical\nErik Killmonger;Ambicioso, Inteligente, Estratégico, Ressentido, Determinado, Inconformado, Persuasivo, Radical\nNick Fury;Estratégico, Desconfiado, Pragmático, Reservado, Controlador, Visionário, Persuasivo, Calculista\nPepper Potts;Organizada, Responsável, Inteligente, Diplomática, Assertiva, Equilibrada, Prática, Confiável\nHappy Hogan;Leal, Protetor, Dedicado, Pragmático, Desconfiado, Prestativo, Cuidadoso, Bem-humorado\nYelena Belova;Sarcástica, Independente, Observadora, Corajosa, Desconfiada, Leal, Espontânea, Resiliente\nCarol Danvers;Independente, Confiante, Determinada, Corajosa, Direta, Competitiva, Assertiva, Persistente\nScott Lang;Bem-humorado, Otimista, Humilde, Espontâneo, Altruísta, Criativo, Afetivo, Descomplicado\nHope van Dyne;Disciplinada, Exigente, Independente, Racional, Competitiva, Organizada, Determinada, Objetiva\nWong;Prudente, Disciplinado, Responsável, Tradicionalista, Sábio, Paciente, Leal, Pragmático\nValentina Allegra de Fontaine;Manipuladora, Ambiciosa, Persuasiva, Calculista, Oportunista, Estratégica, Articulada, Controladora\nWilson Fisk;Dominador, Ambicioso, Calculista, Controlador, Persistente, Intimidador, Estratégico, Emocional\nMatt Murdock;Ético, Persistente, Introspectivo, Idealista, Corajoso, Disciplinado, Teimoso, Altruísta\nJessica Jones;Independente, Cética, Sarcástica, Direta, Desconfiada, Resiliente, Observadora, Protetora\nFrank Castle;Determinado, Obstinado, Reservado, Disciplinado, Vingativo, Pragmático, Protetor, Inflexível";
+function norm(w){w=w.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");return w.replace(/a$/,"o");}
+var CH=RAW.split("\n").map(function(l){var p=l.split(";");return{n:p[0],t:p[1].split(",").map(norm),raw:p[1].split(",").map(function(x){return x.trim();})};});
+var Q=[
+["Zumbis invadem seu prédio às 3h da manhã. Você...",[["Monta uma armadilha com micro-ondas e uma meia furada","Inventivo,Criativo,Impulsivo,Inteligente"],["Organiza os vizinhos em turnos e racionamento de papel higiênico","Estratégico,Responsável,Organizada,Diplomático"],["Sai na porrada gritando o nome da sua mãe","Corajoso,Impulsivo,Protetor,Emocional"],["Observa pelo olho mágico em silêncio até entender o padrão","Observador,Cauteloso,Reservado,Calculista"]]],
+["Seu pet fala pela primeira vez. A primeira frase é...",[["\"Precisamos conversar sobre a ração.\"","Direto,Honesto,Literal,Sincero"],["Uma piada sarcástica sobre o seu cabelo","Sarcástico,Irreverente,Bem-humorado,Confiante"],["\"Posso ler o contrato de adoção?\"","Desconfiado,Analítico,Questionador,Racional"],["Um poema sobre a existência dos sofás","Filosófico,Sensível,Curioso,Introspectivo"]]],
+["Alguém comeu o último pote de sorvete da geladeira. Você...",[["Monta um mural de investigação com barbante","Observador,Astuto,Calculista,Determinado"],["Perdoa em nome da paz e compra outro","Conciliador,Empático,Equilibrado,Humilde"],["Declara guerra e não esquece nunca","Vingativo,Obstinado,Orgulhoso,Impulsivo"],["Culpa o gato e vai dormir tranquilo","Manipulador,Oportunista,Persuasivo,Espontâneo"]]],
+["Karaokê. Microfone na sua mão. Você...",[["Faz show completo com coreografia","Carismático,Confiante,Brincalhão,Egocêntrico"],["Canta um dueto e chora no refrão","Emocional,Sensível,Apaixonado,Afetivo"],["Fica no fundo avaliando a afinação alheia","Reservado,Observador,Exigente,Discreto"],["Foge pela janela do banheiro","Ansioso,Inseguro,Adaptável,Resiliente"]]],
+["Qual superpoder inútil você escolheria?",[["Transformar qualquer comida em queijo","Criativo,Bem-humorado,Descomplicado,Otimista"],["Saber a hora exata, sempre","Disciplinado,Organizada,Pragmático,Prudente"],["Conversar com pombos","Curioso,Gentil,Companheiro,Inocente"],["Ganhar qualquer discussão com sogra","Persuasivo,Articulado,Estratégico,Controlador"]]],
+["Reunião que poderia ter sido um e-mail. Você...",[["Assume o comando e reorganiza a pauta","Determinado,Direto,Assertiva,Controlador"],["Faz uma piada para aliviar o clima","Bem-humorado,Brincalhão,Otimista,Altruísta"],["Desenha foguetes no caderno","Criativo,Inventivo,Irreverente,Independente"],["Anota tudo e manda um resumo depois","Responsável,Organizada,Leal,Prática"]]],
+["Caiu R$ 1 milhão na sua conta. Você...",[["Funda uma startup com nome impronunciável","Ambicioso,Inovador,Confiante,Impulsivo"],["Reforma a casa dos pais e paga as contas de todo mundo","Altruísta,Protetor,Leal,Justo"],["Compra um terreno e some do mapa","Independente,Reservado,Desconfiado,Introspectivo"],["Investe em dez planos ao mesmo tempo","Calculista,Estratégico,Visionário,Pragmático"]]],
+["Seu amigo pede conselho amoroso às 2h da manhã. Você...",[["Atende, escuta tudo e dá bronca com carinho","Empático,Protetor,Leal,Direto"],["Manda um áudio de 9 minutos com a análise completa","Analítico,Inteligente,Racional,Exigente"],["Visualiza e esquece de responder","Reservado,Independente,Cética,Desconfiado"],["Aparece na porta com uma pizza","Leal,Espontâneo,Prestativo,Corajoso"]]],
+["Qual é o seu maior medo absurdo?",[["O Wi-Fi cair no meio de uma reunião importante","Ansioso,Controlador,Inseguro,Cauteloso"],["Ficar sem assunto num jantar com desconhecidos","Vaidoso,Egocêntrico,Orgulhoso,Carismático"],["Meia molhada dentro do tênis","Sensível,Exigente,Resiliente,Teimoso"],["Nenhum, eu encaro tudo de frente","Corajoso,Confiante,Determinado,Persistente"]]],
+["Qual é o seu lema de vida?",[["\"Fiz do meu jeito e deu certo.\"","Independente,Confiante,Persistente,Competitiva"],["\"O certo é certo, mesmo sem plateia.\"","Íntegro,Honesto,Ético,Justo"],["\"Tudo é possível, até pizza de chocolate.\"","Otimista,Criativo,Curioso,Altruísta"],["\"Quem planeja, vence.\"","Estratégico,Disciplinado,Visionário,Calculista"]]]
+];
+var i=0,sc={},raw={},app=document.getElementById("app");
+function show(){
+if(i>=Q.length){return result();}
+var q=Q[i];
+var h='<p class="small">Pergunta '+(i+1)+' de '+Q.length+'</p>';
+h+='<div class="bar"><div style="width:'+Math.round(i/Q.length*100)+'%"></div></div>';
+h+='<p class="q">'+q[0]+'</p>';
+q[1].forEach(function(o,k){h+='<button class="opt" data-k="'+k+'">'+o[0]+'</button>';});
+app.innerHTML=h;
+app.querySelectorAll(".opt").forEach(function(b){b.onclick=function(){pick(+b.getAttribute("data-k"));};});
+}
+function pick(k){
+Q[i][1][k][1].split(",").forEach(function(t){var n=norm(t);sc[n]=(sc[n]||0)+1;raw[n]=raw[n]||t.trim();});
+i++;show();
+}
+function result(){
+var vals=Object.keys(sc).map(function(k){return sc[k];}).sort(function(a,b){return b-a;});
+var maxp=vals.slice(0,8).reduce(function(a,b){return a+b;},0)||1;
+var r=CH.map(function(c){var s=0;c.t.forEach(function(t){s+=sc[t]||0;});return{n:c.n,s:s,c:c};}).sort(function(a,b){return b.s-a.s;});
+var top=r[0],pct=function(x){return Math.min(99,Math.round(x.s/maxp*100));};
+var mytraits=Object.keys(sc).sort(function(a,b){return sc[b]-sc[a];}).slice(0,3).map(function(k){return raw[k];});
+var ini=top.n.split(" ").slice(0,2).map(function(w){return w[0];}).join("");
+var h='<div class="card"><p class="small">Você é...</p><div class="av">'+ini+'</div>';
+h+='<p class="name">'+top.n+'</p><p class="small" style="margin-bottom:12px">'+pct(top)+'% de afinidade</p>';
+h+='<p class="small">Traços do personagem</p><div class="chips">';
+top.c.raw.forEach(function(t){h+='<span class="chip'+(sc[norm(t)]?' hit':'')+'">'+t+'</span>';});
+h+='</div></div>';
+h+='<p class="small">Seus traços mais fortes: <strong style="color:var(--text);font-weight:500">'+mytraits.join(", ")+'</strong></p>';
+h+='<p style="font-size:14px;font-weight:500;margin:16px 0 8px">Quase lá</p>';
+r.slice(1,4).forEach(function(x){var p=pct(x);h+='<div class="row"><span>'+x.n+'</span><span style="color:var(--muted)">'+p+'%</span></div><div class="track"><div style="width:'+p+'%"></div></div>';});
+h+='<div class="actions"><button id="again">Jogar de novo</button></div>';
+app.innerHTML=h;
+document.getElementById("again").onclick=function(){i=0;sc={};raw={};show();};
+}
+show();
+</script>
+</body>
+</html>
