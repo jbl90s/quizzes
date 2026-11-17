@@ -1,0 +1,558 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<title>Que Matéria-Prima Você Seria</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  /* Layout: laudo de laboratório de fundição, uma coluna estreita, uma tela por vez.
+     Cor: aço frio + laranja de metal vazado como único acento. Tipo: Archivo expandida (títulos), Archivo (texto), Plex Mono (dados do laudo). */
+  :root {
+    --bg: #E8EBED;
+    --surface: #F8F9F9;
+    --soft: #DCE1E4;
+    --ink: #14181B;
+    --muted: #55606A;
+    --line: #BCC4CA;
+    --accent: #C23E08;
+    --accent-ink: #FFFFFF;
+    --font-display: "Archivo", "Helvetica Neue", Arial, sans-serif;
+    --font-body: "Archivo", "Helvetica Neue", Arial, sans-serif;
+    --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #111416; --surface: #1A1E21; --soft: #252A2E; --ink: #ECEFF0; --muted: #98A3AB;
+      --line: #384046; --accent: #FF7B3A; --accent-ink: #14181B; color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #111416; --surface: #1A1E21; --soft: #252A2E; --ink: #ECEFF0; --muted: #98A3AB;
+    --line: #384046; --accent: #FF7B3A; --accent-ink: #14181B; color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    background: var(--bg); color: var(--ink);
+    font: 400 1rem/1.55 var(--font-body);
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    padding-block: 20px 48px;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 640px; margin: 0 auto; display: flex; flex-direction: column; gap: 24px; }
+  .mono { font-family: var(--font-mono); font-size: .72rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+  h1, h2, h3 { font-family: var(--font-display); font-stretch: 118%; font-weight: 800; line-height: 1.08; margin: 0; text-wrap: balance; letter-spacing: -.01em; }
+  p { margin: 0; }
+  [hidden] { display: none !important; }
+
+  .top { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; border-bottom: 2px solid var(--ink); padding-bottom: 10px; }
+  .top b { color: var(--ink); font-weight: 500; }
+
+  .screen { display: flex; flex-direction: column; gap: 20px; animation: rise .35s ease both; }
+  @keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+  /* Intro */
+  .intro h1 { font-size: clamp(2rem, 8.5vw, 3.1rem); }
+  .intro h1 em { font-style: normal; color: var(--accent); }
+  .lead { font-size: 1.08rem; color: var(--muted); max-width: 52ch; }
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field input {
+    font: 500 1.05rem var(--font-body); color: var(--ink); background: var(--surface);
+    border: 1.5px solid var(--line); border-radius: 4px; padding: 14px 14px; width: 100%;
+  }
+  .field input:focus-visible { outline: 3px solid var(--accent); outline-offset: 1px; border-color: var(--accent); }
+  .btn {
+    font: 700 1rem var(--font-display); font-stretch: 112%; letter-spacing: .02em;
+    background: var(--accent); color: var(--accent-ink); border: 0; border-radius: 4px;
+    padding: 16px 22px; cursor: pointer; min-height: 52px;
+  }
+  .btn:hover { filter: brightness(1.07); }
+  .btn:focus-visible, .opt:focus-visible, .ghost:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
+  .btn.alt { background: var(--surface); color: var(--ink); border: 1.5px solid var(--ink); }
+  .fine { font-size: .85rem; color: var(--muted); }
+
+  /* Quiz */
+  .bar { display: flex; gap: 3px; }
+  .bar i { flex: 1; height: 7px; background: var(--soft); border-radius: 1px; transition: background .25s; }
+  .bar i.done { background: var(--accent); }
+  .bar i.now { background: var(--ink); }
+  .qhead { display: flex; justify-content: space-between; align-items: center; }
+  .ghost { background: none; border: 0; color: var(--muted); font: 500 .72rem var(--font-mono); letter-spacing: .08em; text-transform: uppercase; cursor: pointer; padding: 8px 0; }
+  .ghost:hover { color: var(--ink); }
+  .ghost[disabled] { visibility: hidden; }
+  .q h2 { font-size: clamp(1.35rem, 5.4vw, 1.8rem); font-stretch: 112%; }
+  .opts { display: flex; flex-direction: column; gap: 10px; padding: 0; margin: 0; list-style: none; }
+  .opt {
+    width: 100%; display: grid; grid-template-columns: 28px 1fr; gap: 12px; align-items: start; text-align: left;
+    font: 500 1rem/1.45 var(--font-body); color: var(--ink); background: var(--surface);
+    border: 1.5px solid var(--line); border-radius: 4px; padding: 14px; cursor: pointer;
+    transition: border-color .15s, background .15s, transform .15s;
+  }
+  .opt .k { font: 500 .8rem var(--font-mono); color: var(--muted); border: 1.5px solid var(--line); border-radius: 3px; width: 28px; height: 28px; display: grid; place-items: center; }
+  .opt:hover { border-color: var(--accent); }
+  .opt.on { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); transform: scale(.995); }
+  .opt.on .k { border-color: currentColor; color: inherit; }
+
+  /* Loading */
+  .melt { height: 12px; background: var(--soft); border-radius: 2px; overflow: hidden; }
+  .melt i { display: block; height: 100%; width: 0; background: var(--accent); animation: pour 2.6s ease-in-out forwards; }
+  @keyframes pour { to { width: 100%; } }
+  .loading h2 { font-size: clamp(1.3rem, 5vw, 1.7rem); min-height: 3.3em; }
+
+  /* Result */
+  .res-head { display: grid; grid-template-columns: 132px 1fr; gap: 20px; align-items: center; }
+  .tile { width: 132px; aspect-ratio: 1; border: 2.5px solid var(--ink); background: var(--surface); position: relative; display: grid; place-items: center; }
+  .tile .n { position: absolute; top: 7px; left: 9px; font: 500 .8rem var(--font-mono); color: var(--muted); }
+  .tile .s { font: 800 3rem/1 var(--font-display); font-stretch: 110%; letter-spacing: -.02em; color: var(--accent); }
+  .tile .c { position: absolute; bottom: 7px; left: 0; right: 0; text-align: center; font: 500 .62rem var(--font-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+  .res-head h1 { font-size: clamp(1.7rem, 7vw, 2.5rem); overflow-wrap: anywhere; }
+  .tagline { font-size: 1.12rem; font-weight: 600; line-height: 1.35; border-left: 4px solid var(--accent); padding-left: 14px; text-wrap: pretty; }
+  .desc { color: var(--ink); max-width: 60ch; text-wrap: pretty; }
+  .panel { background: var(--surface); border: 1.5px solid var(--line); border-radius: 4px; padding: 18px; display: flex; flex-direction: column; gap: 14px; }
+  .panel h3 { font-size: 1.05rem; font-stretch: 112%; }
+  .rows { display: flex; flex-direction: column; gap: 10px; }
+  .row { display: grid; grid-template-columns: minmax(0, 1fr) 46px; gap: 4px 10px; align-items: center; }
+  .row .lbl { font-size: .92rem; }
+  .row .pct { font: 500 .8rem var(--font-mono); text-align: right; font-variant-numeric: tabular-nums; }
+  .row .track { grid-column: 1 / -1; height: 8px; background: var(--soft); border-radius: 1px; overflow: hidden; }
+  .row .track i { display: block; height: 100%; width: 0; background: var(--ink); transition: width .9s cubic-bezier(.2,.7,.2,1); }
+  .row.hi .track i { background: var(--accent); }
+  .pairs { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .pair { border: 1.5px solid var(--line); border-radius: 4px; padding: 14px; background: var(--surface); display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+  .pair b { font: 800 1.05rem/1.2 var(--font-display); font-stretch: 110%; overflow-wrap: anywhere; }
+  .pair span.small { font-size: .85rem; color: var(--muted); }
+  .actions { display: flex; flex-wrap: wrap; gap: 10px; }
+  .actions .btn { flex: 1 1 200px; }
+  .toast { position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--ink); color: var(--bg); font: 500 .85rem var(--font-body); padding: 10px 16px; border-radius: 4px; opacity: 0; pointer-events: none; transition: opacity .2s; max-width: calc(100% - 32px); }
+  .toast.show { opacity: 1; }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+
+  @media (max-width: 440px) {
+    .res-head { grid-template-columns: 1fr; justify-items: start; }
+    .pairs { grid-template-columns: 1fr; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .screen, .melt i { animation: none; }
+    .melt i { width: 100%; }
+    .row .track i, .opt { transition: none; }
+  }
+</style>
+
+</head>
+<body>
+<main class="wrap" id="app">
+  <header class="top mono">
+    <span>Laboratório de Metalurgia dos Amigos</span>
+    <span>Laudo nº <b id="sample">0000</b></span>
+  </header>
+
+  <section class="screen intro" id="intro">
+    <h1>Que matéria-prima de fundição <em>você seria?</em></h1>
+    <p class="lead">Treze perguntas sem pé nem cabeça metalúrgica. No fim, o espectrômetro dá o veredito: uma das 23 matérias-primas, com laudo completo e defeitos de fabricação.</p>
+    <div class="field">
+      <label class="mono" for="who">Nome da amostra (vai no laudo)</label>
+      <input id="who" type="text" maxlength="30" placeholder="Seu nome ou apelido" autocomplete="given-name">
+    </div>
+    <button class="btn" id="start" type="button">Iniciar ensaio</button>
+    <p class="fine">Leva uns 2 minutos. Resultado sem validade científica e com alto valor de fofoca.</p>
+  </section>
+
+  <section class="screen q" id="quiz" hidden>
+    <div class="bar" id="bar" aria-hidden="true"></div>
+    <div class="qhead">
+      <span class="mono" id="count">Ensaio 01 / 13</span>
+      <button class="ghost" id="back" type="button">← Voltar</button>
+    </div>
+    <h2 id="qtext"></h2>
+    <ul class="opts" id="opts"></ul>
+  </section>
+
+  <section class="screen loading" id="loading" hidden aria-live="polite">
+    <span class="mono">Amostra em análise</span>
+    <h2 id="lmsg">Fundindo as suas respostas…</h2>
+    <div class="melt"><i></i></div>
+  </section>
+
+  <section class="screen" id="result" hidden></section>
+</main>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+/* Dimensões do "laudo": INT intensidade, SOC sociabilidade, RIG teimosia/tradição, PER perfeccionismo,
+   IND independência, ADA jogo de cintura, LID controle/liderança, DIS discrição, REQ requinte */
+var DIMS = [
+  { k: 'INT', label: 'Risco de explosão' },
+  { k: 'SOC', label: 'Poder de união' },
+  { k: 'RIG', label: 'Teimosia' },
+  { k: 'PER', label: 'Perfeccionismo' },
+  { k: 'IND', label: 'Independência' },
+  { k: 'ADA', label: 'Jogo de cintura' },
+  { k: 'LID', label: 'Vontade de mandar' },
+  { k: 'DIS', label: 'Discrição' },
+  { k: 'REQ', label: 'Requinte' }
+];
+
+/* v = [INT, SOC, RIG, PER, IND, ADA, LID, DIS, REQ] */
+var MATS = [
+  { name: 'Areia de sílica', sym: 'SiO₂', num: '', cat: 'Moldagem',
+    tag: 'Ninguém lembra que ela estava lá, mas sem ela não existe molde.',
+    text: 'É pé no chão, confiável e não gosta de chamar atenção. Está sempre presente quando precisam dela. Tem personalidade simples e consistente, mas pode ser previsível, conservadora e pouco aberta a novidades.',
+    v: [0, 2, 4, 1, 1, 1, 0, 5, 0] },
+  { name: 'Bentonita sódica', sym: 'Bt', num: '', cat: 'Moldagem',
+    tag: 'Cola gente que não tinha nada a ver. Só não contraria.',
+    text: 'Tem um poder natural de influência e consegue unir pessoas diferentes. É forte, expansiva e sabe se adaptar ao ambiente. Porém, precisa de condições favoráveis para mostrar seu melhor lado e pode ficar instável quando contrariada.',
+    v: [2, 5, 0, 1, 0, 4, 3, 1, 1] },
+  { name: 'Pó de carvão mineral', sym: 'Cm', num: '', cat: 'Moldagem',
+    tag: 'Trabalha no escuro e sabe de tudo. Se perguntarem, ele estava em casa.',
+    text: 'É discreto, protetor e estratégico. Prefere trabalhar nos bastidores, mas sabe como deixar sua marca. Tem um lado misterioso e pode ser difícil de lidar quando acumula problemas.',
+    v: [2, 1, 2, 2, 3, 1, 3, 5, 1] },
+  { name: 'Resina fenólica', sym: 'Rf', num: '', cat: 'Moldagem',
+    tag: 'Disse que estaria ao seu lado em 2019 e continua lá. Com a mesma opinião.',
+    text: 'É determinada, disciplinada e extremamente leal. Quando assume um compromisso, dificilmente volta atrás. Seu problema é a rigidez: tem dificuldade para mudar de opinião, perdoar e se desprender do passado.',
+    v: [1, 2, 5, 3, 1, 0, 2, 2, 0] },
+  { name: 'Amina', sym: 'Am', num: '', cat: 'Moldagem',
+    tag: 'Entrou na sala e a temperatura subiu 15 graus. Não pediu licença.',
+    text: 'É intensa, provocadora e cheia de energia. Chega aos lugares e acelera tudo ao seu redor. Tem facilidade para provocar mudanças, mas pode ser impulsiva, tóxica nas relações e difícil de controlar.',
+    v: [5, 3, 0, 0, 2, 2, 2, 0, 0] },
+  { name: 'Desmoldante', sym: 'Dm', num: '', cat: 'Moldagem',
+    tag: 'Já saiu do grupo antes da discussão começar. Sem brigar com ninguém.',
+    text: 'É independente, diplomático e sabe sair de situações complicadas sem criar conflitos. Não gosta de pressão nem de relacionamentos sufocantes. Seu defeito é evitar vínculos profundos e fugir quando as coisas ficam difíceis.',
+    v: [0, 3, 0, 1, 5, 4, 0, 3, 1] },
+  { name: 'Ferro-gusa', sym: 'FeGu', num: '', cat: 'Carga metálica',
+    tag: 'Anda com a árvore genealógica no bolso. Não mexa na cadeira dele.',
+    text: 'É tradicional, forte e de personalidade marcante. Valoriza suas origens, respeita hierarquias e não se deixa intimidar facilmente. Entretanto, pode ser bruto, antiquado e resistente a qualquer mudança.',
+    v: [3, 1, 5, 0, 2, 0, 3, 1, 0] },
+  { name: 'Sucata de aço', sym: 'Sa', num: '', cat: 'Carga metálica',
+    tag: 'Já foi derrubada mais vezes que o Wi-Fi da fábrica e voltou melhor.',
+    text: 'É guerreira, resiliente e sabe transformar dificuldades em oportunidades. Não tem medo de recomeçar e consegue se reinventar. Entretanto, carrega marcas do passado, pode ser imprevisível e nem sempre entrega aquilo que promete.',
+    v: [3, 2, 0, 0, 3, 5, 1, 2, 0] },
+  { name: 'Retorno de fundição', sym: 'Rt', num: '', cat: 'Carga metálica',
+    tag: 'Nada se perde: nem o material, nem a mágoa de 2014.',
+    text: 'É experiente, econômica e sabe aproveitar oportunidades. Acredita que nada deve ser desperdiçado e sempre encontra uma maneira de recomeçar. Porém, pode viver presa ao passado e repetir velhos problemas.',
+    v: [0, 2, 3, 1, 1, 4, 0, 3, 0] },
+  { name: 'Grafite', sym: 'C', num: '6', cat: 'Carga metálica',
+    tag: 'Seu convite era ótimo, mas ele já tinha um compromisso: ficar em casa.',
+    text: 'É independente, inteligente e não precisa da aprovação dos outros. Tem personalidade própria e sabe trabalhar sozinha. Entretanto, pode ser individualista, distante e pouco disposta a criar conexões profundas.',
+    v: [1, 0, 1, 2, 5, 1, 1, 3, 2] },
+  { name: 'Silício', sym: 'Si', num: '14', cat: 'Ligas e aditivos',
+    tag: 'Não aparece na foto, mas o resultado inteiro depende dele.',
+    text: 'É inteligente, estratégico e sabe exatamente como influenciar os resultados. Não precisa ser o protagonista para ter grande importância. Seu lado negativo é querer controlar tudo e, às vezes, acreditar que sabe mais do que os outros.',
+    v: [1, 1, 1, 3, 2, 1, 5, 4, 2] },
+  { name: 'Manganês', sym: 'Mn', num: '25', cat: 'Ligas e aditivos',
+    tag: 'Alguém precisava resolver, então já resolveu. Ninguém pediu.',
+    text: 'É forte, protetor e sabe administrar conflitos. Tem personalidade firme e costuma assumir responsabilidades que ninguém quer. Porém, pode ser controlador, autoritário e ter dificuldade em aceitar opiniões contrárias.',
+    v: [2, 2, 3, 2, 1, 1, 5, 2, 0] },
+  { name: 'Cromo', sym: 'Cr', num: '24', cat: 'Ligas e aditivos',
+    tag: 'Crítica? Escorregou. Elogio? Anotou.',
+    text: 'É imponente, resistente e não se abala facilmente com críticas. Tem presença forte e transmite segurança. Seu problema é a inflexibilidade: pode ser orgulhoso, defensivo e pouco acessível emocionalmente.',
+    v: [2, 1, 5, 2, 3, 0, 2, 0, 4] },
+  { name: 'Molibdênio', sym: 'Mo', num: '42', cat: 'Ligas e aditivos',
+    tag: 'Faz tudo muito bem, cobra caro e não aceita menos que isso.',
+    text: 'É sofisticado, exigente e extremamente competente. Não gosta de fazer nada pela metade e costuma entregar resultados acima da média. Porém, é caro de manter, difícil de substituir e pode ser excessivamente perfeccionista.',
+    v: [1, 1, 2, 5, 2, 0, 2, 1, 5] },
+  { name: 'Cobre', sym: 'Cu', num: '29', cat: 'Ligas e aditivos',
+    tag: 'Conhece o garçom, o dono e o cachorro do dono. Merece os likes.',
+    text: 'É sociável, versátil e tem facilidade para estabelecer conexões. Tem valor próprio, sabe se comunicar e costuma ser influente. Entretanto, pode ser vaidoso, competitivo e gostar de atenção demais.',
+    v: [2, 5, 0, 1, 0, 3, 2, 0, 3] },
+  { name: 'Níquel', sym: 'Ni', num: '28', cat: 'Ligas e aditivos',
+    tag: 'Não está disponível. Nem pra você, nem pro seu amigo, nem pro amigo do seu amigo.',
+    text: 'É elegante, seletivo e naturalmente sofisticado. Não precisa estar disponível para todos para demonstrar seu valor. É resistente, confiável e difícil de abalar. Seu defeito é a arrogância, o elitismo e a dificuldade de se aproximar de pessoas que considera fora do seu padrão.',
+    v: [0, 1, 3, 3, 4, 0, 1, 1, 5] },
+  { name: 'Magnésio', sym: 'Mg', num: '12', cat: 'Ligas e aditivos',
+    tag: 'Brilha muito, muito rápido e com muito barulho. Mantenha longe da água.',
+    text: 'É intenso, corajoso e transformador. Tem energia para mudar completamente o ambiente e não tem medo de decisões difíceis. Porém, é explosivo, impulsivo e pode provocar grandes problemas quando não sabe controlar suas emoções.',
+    v: [5, 1, 0, 0, 3, 2, 2, 0, 0] },
+  { name: 'Ferro-silício-magnésio', sym: 'FeSiMg', num: '', cat: 'Ligas e aditivos',
+    tag: 'Entrou na reunião e fez todo mundo trabalhar em equipe. Ninguém sabe como.',
+    text: 'É um líder nato, articulador e transformador. Tem capacidade de unir diferentes personalidades e mudar o comportamento de um grupo inteiro. Entretanto, é exigente, intenso e precisa de condições adequadas para funcionar bem.',
+    v: [3, 4, 1, 2, 0, 2, 5, 0, 2] },
+  { name: 'Ferro-silício', sym: 'FeSi', num: '', cat: 'Ligas e aditivos',
+    tag: 'Viu seu jeito de fazer e já tem três sugestões de melhoria. Posso falar?',
+    text: 'É racional, equilibrado e solucionador de problemas. Gosta de organizar as coisas e melhorar o desempenho de quem está ao seu redor. Seu defeito é querer corrigir tudo e acreditar que sempre existe uma maneira mais eficiente de fazer as coisas.',
+    v: [1, 3, 1, 4, 1, 2, 3, 3, 1] },
+  { name: 'Estanho', sym: 'Sn', num: '50', cat: 'Ligas e aditivos',
+    tag: 'Pede desculpa por ter pedido desculpa. Educadíssimo, só não pressione.',
+    text: 'É refinado, educado e diplomático. Valoriza boas relações, tradição e estabilidade. Entretanto, pode ser acomodado, sensível demais às críticas e não tão resistente quando enfrenta situações difíceis sozinho.',
+    v: [0, 4, 3, 1, 0, 1, 0, 2, 4] },
+  { name: 'Zinco', sym: 'Zn', num: '30', cat: 'Ligas e aditivos',
+    tag: 'Resolve com o que tem e ainda sobra troco. Perde a paciência no segundo boleto.',
+    text: 'É prático, econômico e sabe se adaptar às circunstâncias. Não precisa de luxo para entregar resultados e costuma encontrar soluções simples. Porém, pode ser instável, oportunista e perder a compostura quando submetido a muita pressão.',
+    v: [1, 2, 0, 0, 2, 5, 0, 2, 0] },
+  { name: 'Alumínio', sym: 'Al', num: '13', cat: 'Ligas e aditivos',
+    tag: 'Leve, moderno, bem-humorado. Só não pergunte o que ele pensa de verdade.',
+    text: 'É moderno, leve, comunicativo e cheio de possibilidades. Tem facilidade para se adaptar e transitar entre diferentes grupos. Entretanto, pode ser superficial, parecer menos consistente do que realmente é e não gostar de situações que exigem muita pressão.',
+    v: [1, 4, 0, 0, 1, 5, 0, 1, 2] },
+  { name: 'Estrôncio', sym: 'Sr', num: '38', cat: 'Ligas e aditivos',
+    tag: 'Reparou no espaço duplo do slide 14. Está esperando você reparar também.',
+    text: 'É detalhista, refinado e gosta de aperfeiçoar tudo ao seu redor. Percebe pequenas falhas que passam despercebidas pelos outros. Porém, é exigente, perfeccionista e pode perder eficiência quando as condições não são ideais.',
+    v: [1, 1, 1, 5, 2, 0, 1, 3, 3] }
+];
+
+/* p = pontos por dimensão */
+var QUESTIONS = [
+  { q: 'Sexta-feira, 17h58. Seu chefe aparece com “uma coisinha rápida, só pra dar uma olhada”. Você:',
+    a: [
+      { t: 'Diz “pode deixar” e assume tudo, porque se não for você, ninguém faz direito.', p: { LID: 3, RIG: 1 } },
+      { t: 'Finge uma ligação urgente e some pelo corredor, sem confronto nenhum.', p: { IND: 2, ADA: 1, DIS: 1 } },
+      { t: 'Já tinha visto isso chegando e deixou um plano B pronto na gaveta.', p: { PER: 2, LID: 1, DIS: 2 } },
+      { t: 'Resolve na raça com o que tiver à mão. Já passou por coisa pior.', p: { ADA: 3, INT: 1 } }
+    ] },
+  { q: 'Seus amigos organizaram uma festa surpresa pra você. Você chega e:',
+    a: [
+      { t: 'Já corrige a decoração e redistribui as tarefas. Quem escolheu esse bolo?', p: { LID: 2, PER: 2 } },
+      { t: 'Abraça 40 pessoas, faz um discurso e vira a estrela da própria festa.', p: { SOC: 3, REQ: 1, INT: 1 } },
+      { t: 'Fica num canto observando e descobre quem chegou atrasado, quem bebeu demais e quem brigou.', p: { DIS: 3, IND: 1 } },
+      { t: 'Conta pela terceira vez que no seu tempo as festas tinham mais respeito.', p: { RIG: 3, INT: 1 } }
+    ] },
+  { q: 'Você abriu a geladeira agora. O que tem lá dentro?',
+    a: [
+      { t: 'Marmita de segunda, reaproveitada em três versões diferentes até sábado.', p: { ADA: 2, DIS: 1, RIG: 1 } },
+      { t: 'Um queijo curado importado e um espumante. Nem ovo.', p: { REQ: 3, IND: 1, PER: 1 } },
+      { t: 'Potes etiquetados com a data de validade, em ordem de consumo.', p: { PER: 3, RIG: 1, LID: 1 } },
+      { t: 'Refrigerante, sobra de churrasco e um pacote de bolacha aberto desde 2023.', p: { SOC: 1, INT: 1, ADA: 2 } }
+    ] },
+  { q: 'No grupo de WhatsApp da turma, o seu papel é:',
+    a: [
+      { t: 'Quem manda áudio de 4 minutos e conversa com todo mundo ao mesmo tempo.', p: { SOC: 3, REQ: 1 } },
+      { t: 'Quem silenciou o grupo em 2021 e só lê escondido às 3 da manhã.', p: { IND: 3, DIS: 2 } },
+      { t: 'Quem corrige o português e responde “na verdade, o mais eficiente seria…”.', p: { PER: 2, LID: 1, SOC: 1 } },
+      { t: 'Quem joga uma polêmica no grupo e sai para ver o circo pegar fogo.', p: { INT: 3, SOC: 1 } }
+    ] },
+  { q: 'Improvável, mas aconteceu: você acordou transformado(a) em eletrodoméstico. Qual?',
+    a: [
+      { t: 'Micro-ondas. Aquece tudo em 30 segundos e, de vez em quando, explode.', p: { INT: 3, ADA: 1 } },
+      { t: 'Geladeira. Ninguém repara em você, mas se pifar vira crise em casa.', p: { DIS: 3, RIG: 1 } },
+      { t: 'Liquidificador. Mistura quem não combina e, por milagre, dá certo.', p: { SOC: 2, LID: 1, ADA: 1 } },
+      { t: 'Cafeteira de cápsula importada, com Wi-Fi e manual em três idiomas.', p: { REQ: 3, PER: 1 } }
+    ] },
+  { q: 'Fila de banco, 40 pessoas na sua frente. O que você faz?',
+    a: [
+      { t: 'Puxa assunto com a fila inteira e sai com três amigos e um convite de casamento.', p: { SOC: 3, ADA: 1 } },
+      { t: 'Põe o fone, finge que o mundo não existe e vive dentro da própria cabeça.', p: { IND: 3, DIS: 1 } },
+      { t: 'Encontra uma brecha, sorri com educação e passa sem ninguém perceber.', p: { ADA: 2, IND: 1, SOC: 1 } },
+      { t: 'Reclama alto, em tom de quem vai falar com o gerente. E vai mesmo.', p: { INT: 2, LID: 1, RIG: 1 } }
+    ] },
+  { q: 'A frase que seus amigos mais falam sobre você é:',
+    a: [
+      { t: '“Chegou, mudou o clima da sala.”', p: { INT: 2, LID: 1, SOC: 1 } },
+      { t: '“Se tiver dúvida, pergunta pra ele(a). Ele(a) sempre sabe.”', p: { LID: 2, PER: 1, DIS: 1 } },
+      { t: '“Tem aquele jeito de quem não precisa de ninguém.”', p: { IND: 3, REQ: 1 } },
+      { t: '“Nem parece que está aqui, mas se faltar, nada funciona.”', p: { DIS: 3, RIG: 1 } }
+    ] },
+  { q: 'Apocalipse zumbi começou agora. Sua primeira atitude:',
+    a: [
+      { t: 'Monta escala de turnos, controle de estoque e uma hierarquia bem clara.', p: { LID: 3, PER: 1, RIG: 1 } },
+      { t: 'Corre na frente com um taco de beisebol, gritando. O plano vem depois.', p: { INT: 3, ADA: 1 } },
+      { t: 'Recolhe o que sobrou e transforma tudo em ferramenta. Nada se joga fora.', p: { ADA: 3, DIS: 1 } },
+      { t: 'Aceita o fim do mundo, mas não aceita sair mal arrumado(a).', p: { REQ: 3, RIG: 1, IND: 1 } }
+    ] },
+  { q: 'Sua mesa de trabalho está assim:',
+    a: [
+      { t: 'Cabos etiquetados, três monitores alinhados, zero migalhas.', p: { PER: 3, LID: 1, RIG: 1 } },
+      { t: 'Caos que só eu entendo. Se alguém mexer, eu percebo.', p: { IND: 2, DIS: 1, ADA: 1 } },
+      { t: 'Tem carregador de 2009 que eu guardo porque “vai que precisa”.', p: { RIG: 2, ADA: 1, DIS: 1 } },
+      { t: 'Só o essencial, tudo caro e combinando. Nada fora do lugar.', p: { REQ: 3, PER: 1, IND: 1 } }
+    ] },
+  { q: 'Um amigo te chama para uma viagem amanhã, destino surpresa. Você:',
+    a: [
+      { t: 'Faz a mala em 4 minutos. O destino, resolve quando chegar.', p: { ADA: 3, INT: 1 } },
+      { t: 'Pergunta clima, hotel, roteiro, seguro e já pede plano B, C e D.', p: { PER: 2, RIG: 1, LID: 1 } },
+      { t: 'Topa se tiver vinho bom, jantar bacana e pouca gente.', p: { REQ: 3, IND: 1 } },
+      { t: 'Vai, mas só se puder passar metade do tempo sozinho(a).', p: { IND: 3, DIS: 1 } }
+    ] },
+  { q: 'Alguém discorda de você no meio de uma discussão. Você:',
+    a: [
+      { t: 'Mantém a posição até 2037. Não volta atrás.', p: { RIG: 3, INT: 1 } },
+      { t: 'Explode, fala o que pensa e só depois pensa.', p: { INT: 3, SOC: 1 } },
+      { t: 'Muda de assunto com diplomacia e pergunta se já almoçaram.', p: { SOC: 2, ADA: 1, IND: 1 } },
+      { t: 'Escuta os dois lados e faz todo mundo concordar no final.', p: { SOC: 2, LID: 2 } }
+    ] },
+  { q: 'Seu maior defeito, sendo sincero(a):',
+    a: [
+      { t: 'Querer controlar tudo.', p: { LID: 3, PER: 1 } },
+      { t: 'Ser exigente demais, comigo e com todo mundo.', p: { PER: 3, REQ: 1 } },
+      { t: 'Gostar de atenção. De muita atenção. E de elogio.', p: { SOC: 2, REQ: 2 } },
+      { t: 'Viver preso(a) ao passado e remoer coisa de 2014.', p: { RIG: 2, DIS: 1, ADA: 1 } }
+    ] },
+  { q: 'Você ganhou um presente horrível no amigo secreto. O destino dele:',
+    a: [
+      { t: 'Embrulho de novo e mando para o amigo secreto do ano que vem.', p: { ADA: 2, DIS: 1, SOC: 1 } },
+      { t: 'Guardo por 15 anos, porque “foi presente”.', p: { RIG: 2, DIS: 1 } },
+      { t: 'Troco na loja e volto com algo muito melhor.', p: { REQ: 2, ADA: 1, PER: 1 } },
+      { t: 'Agradeço com um sorrisão e dou um jeito de ele sumir.', p: { IND: 2, ADA: 1, SOC: 1 } }
+    ] }
+];
+
+var CAL = {"mu":[0.2739,0.3479,0.2894,0.286,0.2846,0.3682,0.2738,0.301,0.2606],"sd":[0.1483,0.1485,0.1396,0.1365,0.1382,0.1465,0.135,0.1393,0.1465],"mm":[1.6087,2.2174,1.7391,1.6957,1.913,1.913,1.8696,1.913,1.5652],"ms":[1.4062,1.3818,1.75,1.5161,1.442,1.7424,1.5963,1.5011,1.6636],"b":[0.0041,-0.0113,0.0319,-0.0022,0.0076,-0.0621,0.0084,0.0066,0.0064,-0.0475,0.0387,-0.0317,0.0187,-0.0083,-0.0258,-0.0156,0.0349,-0.0276,-0.0048,0.0047,0.0468,-0.0127,0.0407],"maxD":[20,18,19,21,22,19,21,20,22]};
+
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var N = QUESTIONS.length, keys = DIMS.map(function (d) { return d.k; });
+  var answers = [], cur = 0, name = '', lock = false;
+
+  try { $('sample').textContent = String(Math.floor(1000 + Math.random() * 9000)); } catch (e) {}
+
+  function show(id) {
+    ['intro', 'quiz', 'loading', 'result'].forEach(function (s) { $(s).hidden = s !== id; });
+    window.scrollTo(0, 0);
+  }
+
+  function renderBar() {
+    var h = '';
+    for (var i = 0; i < N; i++) h += '<i class="' + (i < cur ? 'done' : i === cur ? 'now' : '') + '"></i>';
+    $('bar').innerHTML = h;
+  }
+
+  function renderQ() {
+    var q = QUESTIONS[cur];
+    renderBar();
+    $('count').textContent = 'Ensaio ' + String(cur + 1).padStart(2, '0') + ' / ' + N;
+    $('back').disabled = cur === 0;
+    $('qtext').textContent = q.q;
+    var ul = $('opts'); ul.innerHTML = '';
+    q.a.forEach(function (a, i) {
+      var li = document.createElement('li');
+      var b = document.createElement('button');
+      b.type = 'button'; b.className = 'opt' + (answers[cur] === i ? ' on' : '');
+      var k = document.createElement('span'); k.className = 'k'; k.textContent = 'ABCD'[i];
+      var t = document.createElement('span'); t.textContent = a.t;
+      b.appendChild(k); b.appendChild(t);
+      b.addEventListener('click', function () { pick(i, b); });
+      li.appendChild(b); ul.appendChild(li);
+    });
+  }
+
+  function pick(i, btn) {
+    if (lock) return; lock = true;
+    answers[cur] = i;
+    Array.prototype.forEach.call(document.querySelectorAll('.opt'), function (o) { o.classList.remove('on'); });
+    btn.classList.add('on');
+    setTimeout(function () {
+      lock = false;
+      if (cur < N - 1) { cur++; renderQ(); window.scrollTo(0, 0); } else analyse();
+    }, 320);
+  }
+
+  /* pontuação */
+  function profile() {
+    var raw = keys.map(function () { return 0; });
+    answers.forEach(function (ai, qi) {
+      var p = QUESTIONS[qi].a[ai].p;
+      keys.forEach(function (k, i) { raw[i] += (p[k] || 0); });
+    });
+    return raw.map(function (v, i) { return (v / CAL.maxD[i] - CAL.mu[i]) / CAL.sd[i]; }); // z
+  }
+  function cosine(a, b) {
+    var d = 0, na = 0, nb = 0;
+    for (var i = 0; i < a.length; i++) { d += a[i] * b[i]; na += a[i] * a[i]; nb += b[i] * b[i]; }
+    return d / (Math.sqrt(na * nb) || 1);
+  }
+  function rank(z) {
+    return MATS.map(function (m, i) {
+      var zm = m.v.map(function (x, j) { return (x - CAL.mm[j]) / CAL.ms[j]; });
+      var c = cosine(z, zm);
+      return { i: i, c: c, s: c + CAL.b[i] };
+    });
+  }
+
+  var LOAD_MSGS = [
+    'Fundindo as suas respostas…',
+    'Passando a sua personalidade no espectrômetro…',
+    'Retirando a escória das suas decisões de vida…',
+    'Conferindo a análise química do seu caráter…',
+    'Vazando o resultado…'
+  ];
+  function analyse() {
+    show('loading');
+    var n = 0, el = $('lmsg'); el.textContent = LOAD_MSGS[0];
+    var t = setInterval(function () { n++; if (n < LOAD_MSGS.length) el.textContent = LOAD_MSGS[n]; }, 560);
+    setTimeout(function () { clearInterval(t); result(); }, 2700);
+  }
+
+  function result() {
+    var z = profile(), r = rank(z);
+    var byS = r.slice().sort(function (a, b) { return b.s - a.s; });
+    var best = MATS[byS[0].i], second = MATS[byS[1].i];
+    var worst = MATS[r.slice().sort(function (a, b) { return a.c - b.c; })[0].i];
+    var pct = z.map(function (x) { return Math.max(4, Math.min(98, Math.round(50 + 22 * x))); });
+    var order = DIMS.map(function (d, i) { return { d: d, p: pct[i], t: i }; }).sort(function (a, b) { return b.p - a.p; });
+
+    var root = $('result'); root.innerHTML = '';
+    function el(tag, cls, txt) { var e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; }
+
+    var head = el('div', 'res-head');
+    var tile = el('div', 'tile'); tile.setAttribute('aria-hidden', 'true');
+    tile.appendChild(el('span', 'n', best.num));
+    var s = el('span', 's', best.sym);
+    if (best.sym.length > 4) s.style.fontSize = '1.7rem'; else if (best.sym.length === 4) s.style.fontSize = '2.3rem';
+    tile.appendChild(s); tile.appendChild(el('span', 'c', best.cat));
+    var hd = el('div'); hd.style.cssText = 'display:flex;flex-direction:column;gap:8px;min-width:0';
+    hd.appendChild(el('span', 'mono', name ? 'Laudo de ' + name : 'Resultado do ensaio'));
+    hd.appendChild(el('h1', '', best.name));
+    head.appendChild(tile); head.appendChild(hd);
+    root.appendChild(head);
+
+    root.appendChild(el('p', 'tagline', best.tag));
+    root.appendChild(el('p', 'desc', best.text));
+
+    var panel = el('div', 'panel');
+    panel.appendChild(el('h3', '', 'Análise de composição'));
+    var rows = el('div', 'rows');
+    order.forEach(function (o, idx) {
+      var row = el('div', 'row' + (idx < 2 ? ' hi' : ''));
+      row.appendChild(el('span', 'lbl', o.d.label));
+      row.appendChild(el('span', 'pct', o.p + '%'));
+      var tr = el('div', 'track'), fill = document.createElement('i'); fill.setAttribute('data-w', o.p + '%');
+      tr.appendChild(fill); row.appendChild(tr); rows.appendChild(row);
+    });
+    panel.appendChild(rows);
+    root.appendChild(panel);
+
+    var pairs = el('div', 'pairs');
+    var p1 = el('div', 'pair'); p1.appendChild(el('span', 'mono', 'Quase foi')); p1.appendChild(el('b', '', second.name)); p1.appendChild(el('span', 'small', 'Segundo lugar no espectrômetro.'));
+    var p2 = el('div', 'pair'); p2.appendChild(el('span', 'mono', 'Não misture com')); p2.appendChild(el('b', '', worst.name)); p2.appendChild(el('span', 'small', 'Incompatibilidade total de temperamento.'));
+    pairs.appendChild(p1); pairs.appendChild(p2); root.appendChild(pairs);
+
+    var act = el('div', 'actions');
+    var cp = el('button', 'btn', 'Copiar resultado para mandar'); cp.type = 'button';
+    cp.addEventListener('click', function () {
+      var txt = 'Fiz o quiz e sou ' + best.name + '! “' + best.tag + '” Descubra qual matéria-prima de fundição é você: ' + location.href;
+      copy(txt);
+    });
+    var again = el('button', 'btn alt', 'Refazer o ensaio'); again.type = 'button';
+    again.addEventListener('click', reset);
+    act.appendChild(cp); act.appendChild(again); root.appendChild(act);
+
+    show('result');
+    requestAnimationFrame(function () { requestAnimationFrame(function () {
+      Array.prototype.forEach.call(root.querySelectorAll('.track i'), function (f) { f.style.width = f.getAttribute('data-w'); });
+    }); });
+  }
+
+  function toast(msg) {
+    var t = $('toast'); t.textContent = msg; t.classList.add('show');
+    setTimeout(function () { t.classList.remove('show'); }, 2200);
+  }
+  function copy(txt) {
+    function fallback() {
+      var ta = document.createElement('textarea'); ta.value = txt; ta.setAttribute('readonly', '');
+      ta.style.cssText = 'position:fixed;left:-9999px;top:0'; document.body.appendChild(ta); ta.select();
+      var ok = false; try { ok = document.execCommand('copy'); } catch (e) {}
+      document.body.removeChild(ta); toast(ok ? 'Resultado copiado!' : 'Não consegui copiar. Segure o texto e copie manualmente.');
+    }
+    try { navigator.clipboard.writeText(txt).then(function () { toast('Resultado copiado!'); }, fallback); } catch (e) { fallback(); }
+  }
+
+  function reset() { answers = []; cur = 0; show('intro'); }
+
+  $('start').addEventListener('click', function () {
+    name = $('who').value.trim(); answers = []; cur = 0; renderQ(); show('quiz');
+  });
+  $('who').addEventListener('keydown', function (e) { if (e.key === 'Enter') $('start').click(); });
+  $('back').addEventListener('click', function () { if (cur > 0 && !lock) { cur--; renderQ(); } });
+})();
+</script>
+</body>
+</html>
